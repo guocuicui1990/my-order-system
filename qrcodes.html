@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家点餐二维码</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .qr-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .qr-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            border: 1px solid #eee;
+            padding: 10px;
+            background: white;
+        }
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .qr-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .qr-link {
+            font-size: 12px;
+            color: #999;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>商家点餐二维码</h1>
+        <p>请将对应的二维码打印出来，放在相应商家的摊位前</p>
+    </div>
+    
+    <div class="qr-grid">
+        <!-- 我的摊位 -->
+        <div class="qr-card">
+            <h3>我的摊位（演示）</h3>
+            <div class="qr-code">
+                <!-- 这里放你的二维码图片 -->
+                <img src="images/shops/default_shop/qrcode.jpg" alt="我的摊位点餐码">
+            </div>
+            <div class="qr-desc">顾客扫描此二维码进入点餐页面</div>
+            <div class="qr-link">index.html?shop=default_shop</div>
+        </div>
+        
+        <!-- 老王煎饼 -->
+        <div class="qr-card">
+            <h3>老王煎饼</h3>
+            <div class="qr-code">
+                <!-- 这里放老王煎饼的二维码图片 -->
+                <img src="images/shops/老王煎饼/qrcode.jpg" alt="老王煎饼点餐码">
+            </div>
+            <div class="qr-desc">顾客扫描此二维码进入点餐页面</div>
+            <div class="qr-link">index.html?shop=老王煎饼</div>
+        </div>
+        
+        <!-- 小李烧烤 -->
+        <div class="qr-card">
+            <h3>小李烧烤</h3>
+            <div class="qr-code">
+                <!-- 这里放小李烧烤的二维码图片 -->
+                <img src="images/shops/小李烧烤/qrcode.jpg" alt="小李烧烤点餐码">
+            </div>
+            <div class="qr-desc">顾客扫描此二维码进入点餐页面</div>
+            <div class="qr-link">index.html?shop=小李烧烤</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+        <h4>打印说明：</h4>
+        <p>1. 右键点击二维码图片 → 选择"图片另存为" → 保存到电脑</p>
+        <p>2. 将图片插入Word文档 → 调整大小为10×10厘米 → 打印</p>
+        <p>3. 建议使用亚光不干胶纸打印，防止反光</p>
+    </div>
+</body>
+</html>

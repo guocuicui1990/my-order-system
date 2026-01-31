@@ -1,0 +1,2164 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家后台 - 实时订单管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 商家配置文件 -->
+    <script src="config.js"></script>
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .admin-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 取餐码重置区域样式 */
+        .sequence-reset-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .reset-sequence-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+        
+        .reset-sequence-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+        
+        .reset-sequence-btn:active {
+            transform: translateY(0);
+        }
+
+        .auto-refresh {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .refresh-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .refresh-status {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .tabs-container {
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-badge {
+            background: #ff4757;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .tab.active .tab-badge {
+            background: white;
+            color: #667eea;
+        }
+
+        .orders-container {
+            min-height: 400px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border: 1px solid #f0f0f0;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .new-order-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: auto;
+        }
+
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .floating-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-cart i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* 本地订单样式 */
+        .local-order-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        /* 订单状态按钮 */
+        .order-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-start {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-complete {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-start:hover {
+            background: #f57c00;
+        }
+        
+        .btn-complete:hover {
+            background: #388e3c;
+        }
+        
+        .btn-cancel:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-cancel:active {
+            transform: translateY(0);
+        }
+        
+        /* 云端连接测试区域 */
+        .connection-test {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .test-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .test-btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .test-btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* 清空按钮样式 */
+        .clear-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 推荐管理样式 */
+        .recommend-management {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .recommend-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-size: 13px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        
+        .recommend-list {
+            margin-top: 20px;
+        }
+        
+        .recommend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .recommend-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .recommend-info {
+            flex: 1;
+        }
+        
+        .recommend-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .recommend-price {
+            color: #ff6b6b;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .recommend-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .recommend-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #388e3c;
+        }
+        
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+        
+        /* 添加推荐管理标签页 */
+        .recommend-tab {
+            position: relative;
+        }
+        
+        .recommend-tab .tab-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 商家选择器样式 */
+        .shop-selector {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .shop-selector label {
+            font-size: 13px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .shop-selector select {
+            padding: 8px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 150px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .shop-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        
+        .current-shop-display {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .current-shop-display i {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <h1>
+                    <i class="fas fa-store"></i> 商家后台 - 实时订单管理
+                </h1>
+                <p>
+                    <span class="connection-status status-connected" id="connectionStatus">
+                        <i class="fas fa-circle"></i> 正在连接...
+                    </span>
+                    &nbsp;&nbsp;订单自动同步，商家端可跨网络实时查看
+                </p>
+                
+                <!-- 商家显示（不再提供切换功能） -->
+                <div class="shop-selector">
+                    <div class="current-shop-display" id="currentShopDisplay">
+                        <i class="fas fa-store"></i> 当前商家: <strong><span id="currentShopName">我的摊位</span></strong>
+                        <span style="color: #666; font-size: 12px; margin-left: 10px;">
+                            （独立后台，无法切换其他商家）
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- 导航链接已被移除 -->
+                
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOrders">0</div>
+                        <div class="stat-label">总订单</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="newOrders">0</div>
+                        <div class="stat-label">新订单</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="processingOrders">0</div>
+                        <div class="stat-label">处理中</div>
+                    </div>
+                    <div class="stat-card" style="position: relative;">
+                        <div class="stat-value" id="todayRevenue">0</div>
+                        <div class="stat-label">今日营收</div>
+                        <!-- 🔥 添加清空按钮 -->
+                        <button class="clear-btn" onclick="clearTodayStats()" title="清空今日数据">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 取餐码重置区域 -->
+                <div class="sequence-reset-area" style="margin-top: 15px;">
+                    <button class="reset-sequence-btn" onclick="resetSequenceNumber()" title="重置取餐码">
+                        <i class="fas fa-redo-alt"></i> 重置取餐码
+                    </button>
+                    <span style="font-size: 12px; color: #666; margin-left: 10px;">
+                        当前: <span id="currentSequenceDisplay">A001</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Supabase连接测试区域 -->
+        <div class="connection-test">
+            <h3 style="margin-bottom: 10px; font-size: 14px; color: #333;">
+                <i class="fas fa-network-wired"></i> Supabase连接测试
+            </h3>
+            <div id="connectionTestResult" style="font-size: 13px; margin-bottom: 10px;">
+                Supabase URL: <code id="supabaseUrlDisplay">slonbvmhsxqgpoodwazj.supabase.co</code> | 状态: <span id="testStatus">等待测试</span>
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn test-btn-primary" onclick="testConnection()">
+                    <i class="fas fa-bolt"></i> 测试连接
+                </button>
+                <button class="test-btn test-btn-secondary" onclick="createTestOrder()">
+                    <i class="fas fa-plus"></i> 创建测试订单
+                </button>
+                <button class="test-btn test-btn-secondary" onclick="showLocalOrders()">
+                    <i class="fas fa-database"></i> 查看本地订单
+                </button>
+            </div>
+        </div>
+        
+        <!-- 本地订单提醒 -->
+        <div class="local-order-notice" id="localModeNotice" style="display: none;">
+            <i class="fas fa-info-circle"></i> 
+            <strong>本地模式提醒：</strong>当前为本地模式，订单不会保存到云端。如需使用云端同步功能，请检查Supabase配置。
+        </div>
+        
+        <div class="auto-refresh">
+            <h3 style="margin-bottom: 15px; font-size: 14px; color: #333;">
+                <i class="fas fa-info-circle"></i> 实时同步说明
+            </h3>
+            <div class="refresh-controls">
+                <div class="refresh-status">
+                    使用Supabase数据库，订单实时同步 | 最后更新: <span id="lastUpdateTime">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('new')" data-tab="new">
+                    <i class="fas fa-bell"></i> 新订单
+                    <span class="tab-badge" id="newOrdersBadge">0</span>
+                </button>
+                <button class="tab" onclick="switchTab('processing')" data-tab="processing">
+                    <i class="fas fa-clock"></i> 处理中
+                    <span class="tab-badge" id="processingOrdersBadge">0</span>
+                </button>
+                <button class="tab" onclick="switchTab('completed')" data-tab="completed">
+                    <i class="fas fa-check"></i> 已完成
+                    <span class="tab-badge" id="completedOrdersBadge">0</span>
+                </button>
+                <button class="tab recommend-tab" onclick="switchTab('recommend')" data-tab="recommend">
+                    <i class="fas fa-star"></i> 推荐管理
+                    <span class="tab-badge" id="recommendCount">0</span>
+                </button>
+                <button class="tab" onclick="switchTab('all')" data-tab="all">
+                    <i class="fas fa-list"></i> 全部订单
+                </button>
+            </div>
+        </div>
+        
+        <!-- 推荐管理页面 -->
+        <div class="recommend-management" id="recommendPage" style="display: none;">
+            <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-star"></i> 今日推荐管理 - <span id="recommendShopName">我的摊位</span>
+            </h3>
+            
+            <div class="recommend-form">
+                <div class="form-group">
+                    <label for="recommendName">菜品名称 *</label>
+                    <input type="text" id="recommendName" placeholder="例如：招牌炸酱面" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="recommendPrice">价格 *</label>
+                    <input type="number" id="recommendPrice" placeholder="例如：15" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="recommendDesc">描述/备注</label>
+                    <input type="text" id="recommendDesc" placeholder="例如：今日特惠" maxlength="30">
+                </div>
+                
+                <div class="form-group">
+                    <label for="recommendSort">排序序号</label>
+                    <input type="number" id="recommendSort" placeholder="数字越小越靠前" min="0" value="0">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="test-btn test-btn-primary" onclick="saveRecommendation()">
+                        <i class="fas fa-save"></i> 保存推荐
+                    </button>
+                    <button class="test-btn test-btn-secondary" onclick="clearRecommendForm()">
+                        <i class="fas fa-times"></i> 清空
+                    </button>
+                </div>
+            </div>
+            
+            <div class="recommend-list" id="recommendList">
+                <div class="empty-cart">
+                    <i class="fas fa-star"></i>
+                    <p>暂无推荐菜品</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">添加的推荐菜品将显示在顾客端首页</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="orders-container" id="ordersContainer">
+            <div class="empty-cart">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>正在连接云端...</p>
+            </div>
+        </div>
+        
+        <div class="new-order-notification" id="newOrderNotification">
+            <div class="notification-content">
+                <i class="fas fa-bell" style="font-size: 18px;"></i>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 3px;">新订单提醒</div>
+                    <div style="font-size: 12px;" id="notificationMessage">有新订单到达！</div>
+                </div>
+                <button class="notification-close" onclick="hideNotification()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="floating-actions">
+            <button class="floating-btn" onclick="loadOrders()" title="立即刷新">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ============================================
+        // 全局变量和配置 - 多商家支持
+        // ============================================
+        let currentTab = 'new';
+        let allOrders = [];
+        let allRecommendations = [];
+        let realtimeSubscription = null;
+        let isCloudMode = false;
+        let editingRecommendId = null;
+        let currentShopId = ''; // 当前商家ID
+        let currentShopConfig = null; // 当前商家配置
+
+    // ============================================
+    // 从Supabase动态加载商家菜品（管理端）
+    // ============================================
+    async function loadShopDishesFromSupabase(shopId) {
+        try {
+            console.log('📋 管理端：从Supabase加载商家菜品，商家ID:', shopId);
+            
+            // 检查Supabase是否已连接
+            if (!supabaseClient || !isCloudMode) {
+                console.log('📝 管理端：Supabase未连接，无法加载菜品');
+                return null;
+            }
+            
+            // 从Supabase加载商家的菜品
+            const { data: dishes, error } = await supabaseClient
+                .from('dishes')
+                .select('*')
+                .eq('tenant_id', shopId)
+                .order('sort_order', { ascending: true });
+            
+            if (error) {
+                console.error('❌ 管理端：从Supabase加载菜品失败:', error);
+                return null;
+            }
+            
+            if (dishes && dishes.length > 0) {
+                console.log('✅ 管理端：从Supabase加载到菜品:', dishes.length, '个');
+                
+                // 转换数据格式
+                const formattedDishes = dishes.map(dish => ({
+                    id: dish.id,
+                    name: dish.name,
+                    price: parseFloat(dish.price),
+                    emoji: dish.emoji || '🍽️',
+                    category: dish.category || '未分类',
+                    tags: dish.tags || [],
+                    description: dish.description || '',
+                    is_active: dish.is_active,
+                    sort_order: dish.sort_order,
+                    created_at: dish.created_at,
+                    updated_at: dish.updated_at
+                }));
+                
+                return formattedDishes;
+            }
+            
+            console.log('📝 管理端：Supabase中没有找到菜品');
+            return null;
+            
+        } catch (error) {
+            console.error('❌ 管理端：加载菜品异常:', error);
+            return null;
+        }
+    }
+        
+        // Supabase配置
+        const SUPABASE_URL = 'https://slonbvmhsxqgpoodwazj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsb25idm1oc3hxZ3Bvb2R3YXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzMyNjQsImV4cCI6MjA4NDYwOTI2NH0.YLZqdnZl1vDTOrT6bzi2ulN1BGRxKGyW30AuccuWJq4';
+        
+        let supabaseClient = null;
+        let localOrders = JSON.parse(localStorage.getItem('localOrders') || '[]');
+        
+        // ============================================
+        // 页面加载完成后初始化 - 多商家支持
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 商家后台初始化...');
+            
+            // 1. 获取当前商家配置
+            currentShopId = getCurrentShopId();
+            currentShopConfig = getCurrentShopConfig();
+            
+            console.log('🏪 当前商家:', currentShopConfig.name, 'ID:', currentShopId);
+        
+        // 2. 更新页面显示
+        updateShopDisplay();
+        
+        // 3. 更新页面标题
+        document.title = `${currentShopConfig.name} - 商家后台`;
+        
+        // 4. 显示Supabase URL
+        document.getElementById('supabaseUrlDisplay').textContent = 'slonbvmhsxqgpoodwazj.supabase.co';
+        
+        // 5. 尝试连接Supabase
+        await initSupabase();
+        
+        // 6. 动态加载商家菜品（可选，根据需求）
+        // 注意：商家后台主要管理订单，菜品管理通常单独处理
+        // 如果你需要在后台显示菜品，可以取消下面的注释
+        // await loadShopDishesForAdmin();
+        
+        // 7. 加载订单
+        await loadOrders();
+        
+        // 8. 加载推荐菜品
+        await loadRecommendations();
+        
+        // 9. 加载当前取餐码
+        await loadCurrentSequence();
+            
+            console.log('✅ 商家后台初始化完成');
+        });
+        
+        // ============================================
+        // 更新商家显示
+        // ============================================
+        function updateShopDisplay() {
+            // 更新当前商家显示
+            document.getElementById('currentShopName').textContent = currentShopConfig.name;
+            
+            // 更新推荐管理页面的商家名称
+            const recommendShopName = document.getElementById('recommendShopName');
+            if (recommendShopName) {
+                recommendShopName.textContent = currentShopConfig.name;
+            }
+        }
+        
+        // ============================================
+        // 初始化Supabase - 多商家支持
+        // ============================================
+        async function initSupabase() {
+            try {
+                console.log('🌐 商家端连接Supabase...');
+                
+                // 检查supabase是否已加载
+                if (typeof supabase === 'undefined') {
+                    console.error('❌ Supabase SDK 未加载');
+                    updateConnectionStatus(false, 'SDK未加载');
+                    return;
+                }
+                
+                // 1. 初始化客户端
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase 客户端初始化成功');
+                
+                // 2. 测试连接 - 加上tenant_id条件
+                console.log('📊 测试数据库连接...');
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('tenant_id', currentShopId) // 多商家支持
+                        .limit(1);
+                    
+                    if (error) {
+                        console.error('❌ 数据库连接测试失败:', error.message);
+                        
+                        if (error.message.includes('relation') || error.message.includes('不存在')) {
+                            updateConnectionStatus(false, '表不存在');
+                            showToast('❌ orders表不存在，请先在Supabase创建orders表', 'error');
+                        } else {
+                            updateConnectionStatus(false, '连接失败');
+                        }
+                    } else {
+                        console.log('✅ 数据库连接测试成功，已有订单数:', data.length);
+                        
+                        isCloudMode = true;
+                        updateConnectionStatus(true, '云端已连接');
+                        
+                        // 启动实时监听
+                        setupRealtimeWatch();
+                    }
+                    
+                } catch (dbError) {
+                    console.error('❌ 数据库连接测试异常:', dbError.message);
+                    updateConnectionStatus(false, '连接异常');
+                    showToast('❌ Supabase连接异常: ' + dbError.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ Supabase初始化失败:', error);
+                updateConnectionStatus(false, error.message);
+                showToast('❌ Supabase连接失败: ' + error.message, 'error');
+            }
+        }
+        
+        // ============================================
+        // 设置实时监听（云端模式）- 多商家支持
+        // ============================================
+        function setupRealtimeWatch() {
+            if (!isCloudMode || !supabaseClient) {
+                console.log('📝 无法启动实时监听，当前为本地模式');
+                return;
+            }
+            
+            try {
+                console.log('📡 启动实时订单监听...');
+                
+                // 关闭之前的订阅（如果有）
+                if (realtimeSubscription) {
+                    supabaseClient.removeChannel(realtimeSubscription);
+                }
+                
+                // 创建新的订阅 - 监听当前商家的订单
+                realtimeSubscription = supabaseClient
+                    .channel('orders-channel')
+                    .on('postgres_changes', 
+                        { 
+                            event: 'INSERT', 
+                            schema: 'public', 
+                            table: 'orders',
+                            filter: `tenant_id=eq.${currentShopId}` // 多商家支持：只监听当前商家
+                        }, 
+                        (payload) => {
+                            console.log('📡 检测到新订单:', payload.new);
+                            console.log('事件类型: INSERT');
+                            
+                            // 重新加载订单
+                            loadOrders();
+                            
+                            // 显示新订单通知
+                            showNewOrderNotification(1);
+                        }
+                    )
+                    .on('postgres_changes',
+                        {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'orders',
+                            filter: `tenant_id=eq.${currentShopId}` // 多商家支持：只监听当前商家
+                        },
+                        (payload) => {
+                            console.log('📡 检测到订单更新:', payload.new);
+                            console.log('事件类型: UPDATE');
+                            
+                            // 重新加载订单
+                            loadOrders();
+                        }
+                    )
+                    .subscribe((status) => {
+                        console.log('📡 实时订阅状态:', status);
+                        
+                        if (status === 'SUBSCRIBED') {
+                            console.log('✅ 实时监听已启动');
+                            showToast('✅ 实时监听已启动，等待新订单...', 'success');
+                        } else if (status === 'CHANNEL_ERROR') {
+                            console.error('❌ 实时监听通道错误');
+                            updateConnectionStatus(false, '监听断开');
+                        } else if (status === 'TIMED_OUT') {
+                            console.error('❌ 实时监听超时');
+                            updateConnectionStatus(false, '监听超时');
+                        }
+                    });
+                
+            } catch (error) {
+                console.error('❌ 启动实时监听失败:', error);
+                // 降级方案：使用轮询
+                console.log('📌 使用轮询模式（每5秒刷新）');
+                setInterval(() => loadOrders(), 5000);
+            }
+        }
+        
+        // ============================================
+        // 重置取餐码函数 - 多商家支持（独立重置）
+        // ============================================
+        async function resetSequenceNumber() {
+    if (!confirm('⚠️ 确定要重置取餐码吗？\n\n这将：\n1. 重置取餐码序列为 A001\n2. 当前商家的顾客端将立即更新\n3. 不会影响其他商家\n4. 建议在营业开始前操作')) {
+        return;
+    }
+    
+    try {
+        console.log('🔄 开始重置取餐码（商家:', currentShopId, '）...');
+        
+        if (!isCloudMode || !supabaseClient) {
+            showToast('当前为本地模式，无法重置取餐码', 'warning');
+            return;
+        }
+        
+        // 显示加载中
+        showToast('正在重置取餐码...', 'info');
+        
+        // 🔥 固定使用 'A' 作为前缀
+        const { error: prefixError } = await supabaseClient
+            .from('settings')
+            .update({ 
+                setting_value: 'A', // 固定为 A
+                updated_at: new Date().toISOString()
+            })
+            .eq('setting_key', 'sequence_prefix')
+            .eq('tenant_id', currentShopId);
+        
+        if (prefixError) throw prefixError;
+        
+        const { error: counterError } = await supabaseClient
+            .from('settings')
+            .update({ 
+                setting_value: '1',
+                updated_at: new Date().toISOString()
+            })
+            .eq('setting_key', 'sequence_counter')
+            .eq('tenant_id', currentShopId);
+        
+        if (counterError) throw counterError;
+        
+        console.log('✅ 取餐码重置成功（商家:', currentShopId, '）');
+        showToast('✅ 取餐码已重置为 A001，顾客端将自动更新', 'success');
+        
+        // 更新显示
+        document.getElementById('currentSequenceDisplay').textContent = 'A001';
+        
+    } catch (error) {
+        console.error('❌ 重置取餐码失败:', error);
+        showToast('❌ 重置失败: ' + error.message, 'error');
+    }
+}
+        
+        // ============================================
+        // 加载当前取餐码状态 - 多商家支持
+        // ============================================
+        async function loadCurrentSequence() {
+            if (!isCloudMode || !supabaseClient) {
+                document.getElementById('currentSequenceDisplay').textContent = 'A001';
+                return;
+            }
+            
+            try {
+                console.log('🔢 加载当前取餐码（商家:', currentShopId, '）...');
+                
+                // 同时获取前缀和计数器
+                const [prefixResult, counterResult] = await Promise.all([
+                    supabaseClient
+                        .from('settings')
+                        .select('setting_value')
+                        .eq('setting_key', 'sequence_prefix')
+                        .eq('tenant_id', currentShopId)
+                        .maybeSingle(), // 使用maybeSingle避免错误
+                    
+                    supabaseClient
+                        .from('settings')
+                        .select('setting_value')
+                        .eq('setting_key', 'sequence_counter')
+                        .eq('tenant_id', currentShopId)
+                        .maybeSingle()
+                ]);
+                
+                const prefix = prefixResult.data?.setting_value || 'A';
+                const counter = counterResult.data?.setting_value || '1';
+                const currentSeq = prefix + counter.padStart(3, '0');
+                
+                console.log('📊 当前取餐码（商家:', currentShopId, '）:', currentSeq);
+                document.getElementById('currentSequenceDisplay').textContent = currentSeq;
+                
+            } catch (error) {
+                console.error('❌ 加载当前取餐码失败:', error);
+                document.getElementById('currentSequenceDisplay').textContent = 'A001';
+            }
+        }
+        
+        // ============================================
+        // 加载订单（完全适配你的表结构）- 多商家支持
+        // ============================================
+        async function loadOrders() {
+            try {
+                showLoading();
+                
+                if (isCloudMode && supabaseClient) {
+                    // 云端模式 - 只加载当前商家的订单
+                    console.log('🌐 从Supabase加载订单（商家:', currentShopId, '）...');
+                    
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('tenant_id', currentShopId) // 多商家支持：只获取当前商家的订单
+                        .order('timestamp', { ascending: false })
+                        .limit(100);
+                    
+                    if (error) {
+                        console.error('❌ 从Supabase加载订单失败:', error);
+                        throw new Error(error.message);
+                    }
+                    
+                    console.log('✅ 从云端加载到', data.length, '个订单（商家:', currentShopId, ')');
+                    
+                    // 转换字段名，完全适配你的表结构
+                    allOrders = data.map(order => {
+                        const hasId = order.id !== undefined;
+                        
+                        return {
+                            _id: hasId ? order.id : order.order_number,
+                            id: hasId ? order.id : order.order_number,
+                            orderNumber: order.order_number,
+                            table: order.table,
+                            dishes: order.dishes,
+                            totalAmount: order.total_amount,
+                            status: order.status || '新订单',
+                            orderTime: order.order_time,
+                            timestamp: order.timestamp || Date.now(),
+                            source: '顾客扫码点餐',
+                            tenant_id: order.tenant_id, // 保存商家ID
+                            _raw: order
+                        };
+                    });
+                    
+                } else {
+                    // 本地模式 - 过滤当前商家的订单
+                    console.log('📝 加载本地订单（商家:', currentShopId, '）...');
+                    
+                    // 显示本地模式提醒
+                    const notice = document.getElementById('localModeNotice');
+                    if (notice) notice.style.display = 'block';
+                    
+                    // 过滤当前商家的订单
+                    allOrders = localOrders.filter(order => order.tenant_id === currentShopId);
+                    console.log('本地订单数（商家', currentShopId, '）:', allOrders.length);
+                }
+                
+                // 更新显示
+                displayOrders();
+                updateStats();
+                updateLastUpdateTime();
+                
+            } catch (error) {
+                console.error('❌ 加载订单失败:', error);
+                console.log('错误详情:', error.message);
+                
+                // 显示错误信息
+                const container = document.getElementById('ordersContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="empty-cart">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>加载失败: ${error.message || '未知错误'}</p>
+                            <button onclick="loadOrders()" style="margin-top: 15px; padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                重试
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                updateConnectionStatus(false, '加载失败');
+            }
+        }
+        
+        // ============================================
+        // 显示订单列表 - 多商家支持
+        // ============================================
+        function displayOrders() {
+            let filteredOrders = [];
+            
+            // 根据标签页筛选
+            if (currentTab === 'new') {
+                filteredOrders = allOrders.filter(o => o.status === '新订单');
+                console.log('新订单列表（商家', currentShopId, '）:', filteredOrders.length, '个');
+            } else if (currentTab === 'processing') {
+                filteredOrders = allOrders.filter(o => o.status === '处理中');
+                console.log('处理中列表（商家', currentShopId, '）:', filteredOrders.length, '个');
+            } else if (currentTab === 'completed') {
+                filteredOrders = allOrders.filter(o => o.status === '已完成');
+            } else {
+                filteredOrders = allOrders;
+            }
+            
+            const container = document.getElementById('ordersContainer');
+            if (!container) return;
+            
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-inbox"></i>
+                        <p>暂无${currentTab === 'all' ? '' : currentTab === 'new' ? '新' : currentTab === 'processing' ? '处理中的' : '已完成的'}订单</p>
+                        ${!isCloudMode ? '<p style="font-size: 12px; color: #999; margin-top: 10px;">当前为本地模式，仅显示本地存储的订单</p>' : ''}
+                        <p style="font-size: 12px; color: #999; margin-top: 5px;">当前商家: ${currentShopConfig.name}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredOrders.map(order => {
+                const orderId = order._id || order.id || Math.random().toString(36).substr(2, 9);
+                const isLocalOrder = order.isLocal || !order._id;
+                
+                return `
+                <div class="order-card">
+                    <div class="order-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span class="order-number" style="font-weight: 600; font-size: 16px;">
+                            <i class="fas fa-hashtag"></i> 取餐号: #${order.table}
+                            <span style="font-size: 12px; color: #666; margin-left: 10px;">
+                                <i class="fas fa-receipt"></i> ${order.orderNumber}
+                            </span>
+                        </span>
+                        <span class="order-status" style="padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; ${order.status === '新订单' ? 'background: #e3f2fd; color: #1976d2;' : order.status === '处理中' ? 'background: #fff3e0; color: #f57c00;' : 'background: #e8f5e9; color: #388e3c;'}">
+                            ${order.status}
+                        </span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-info" style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 13px; color: #666;">
+                            <span><i class="fas fa-chair" style="color: #667eea;"></i> 桌号: <strong>${order.table || '未知'}</strong></span>
+                            <span><i class="fas fa-clock" style="color: #667eea;"></i> ${order.orderTime || '未知时间'}</span>
+                        </div>
+                        <div class="order-dishes" style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; line-height: 1.6;">
+                            ${order.dishes || '无菜品信息'}
+                        </div>
+                        <div class="order-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="order-total" style="font-weight: 600; color: #ff6b6b; font-size: 18px;">
+                                总计: ¥${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}
+                            </div>
+                            ${!isLocalOrder && isCloudMode && order.status !== '已完成' && order.status !== '已取消' ? `
+                            <div class="order-actions" style="display: flex; gap: 8px;">
+                                ${order.status === '新订单' ? `
+                                    <button class="btn-start" onclick="updateOrderStatus('${orderId}', '${order.orderNumber}', '处理中')">
+                                        <i class="fas fa-clock"></i> 开始制作
+                                    </button>
+                                    <button class="btn-cancel" onclick="cancelOrder('${orderId}', '${order.orderNumber}')">
+                                        <i class="fas fa-times"></i> 撤单
+                                    </button>
+                                ` : ''}
+                                ${order.status === '处理中' ? `
+                                    <button class="btn-complete" onclick="updateOrderStatus('${orderId}', '${order.orderNumber}', '已完成')">
+                                        <i class="fas fa-check"></i> 完成
+                                    </button>
+                                    <button class="btn-cancel" onclick="cancelOrder('${orderId}', '${order.orderNumber}')">
+                                        <i class="fas fa-times"></i> 撤单
+                                    </button>
+                                ` : ''}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+        
+        // ============================================
+        // 更新订单状态（完全适配你的表结构）- 多商家支持
+        // ============================================
+        async function updateOrderStatus(orderId, orderNumber, newStatus) {
+            try {
+                console.log('🔄 更新订单状态:', orderId, orderNumber, newStatus, '商家:', currentShopId);
+                
+                if (!isCloudMode || !supabaseClient) {
+                    showToast('当前为本地模式，无法更新状态', 'warning');
+                    return;
+                }
+                
+                // 更新数据
+                const updateData = { 
+                    status: newStatus,
+                    timestamp: Date.now()
+                };
+                
+                console.log('更新数据:', updateData);
+                
+                // 使用 order_number 和 tenant_id 更新
+                const { error } = await supabaseClient
+                    .from('orders')
+                    .update(updateData)
+                    .eq('order_number', orderNumber)
+                    .eq('tenant_id', currentShopId); // 多商家支持
+                
+                if (error) {
+                    console.error('❌ 更新订单状态失败:', error);
+                    showToast('❌ 更新失败: ' + error.message, 'error');
+                    return;
+                }
+                
+                console.log('✅ 订单状态更新成功');
+                showToast(`✅ 订单已更新为 ${newStatus}`, 'success');
+                
+                // 关键修复：立即重新从数据库加载数据，确保状态同步
+                setTimeout(async () => {
+                    await loadOrders();
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ 更新订单状态失败:', error);
+                showToast('❌ 更新失败: ' + error.message, 'error');
+            }
+        }
+        
+        // ============================================
+        // 撤单函数 - 多商家支持
+        // ============================================
+        async function cancelOrder(orderId, orderNumber) {
+            if (!confirm(`确定要撤消订单 #${orderNumber} 吗？此操作不可恢复。`)) {
+                return;
+            }
+            
+            try {
+                console.log('❌ 撤单:', orderId, orderNumber, '商家:', currentShopId);
+                
+                if (!isCloudMode || !supabaseClient) {
+                    showToast('当前为本地模式，无法撤单', 'warning');
+                    return;
+                }
+                
+                // 更新订单状态为"已取消"
+                const updateData = { 
+                    status: '已取消',
+                    timestamp: Date.now()
+                };
+                
+                console.log('撤单数据:', updateData);
+                
+                const { error } = await supabaseClient
+                    .from('orders')
+                    .update(updateData)
+                    .eq('order_number', orderNumber)
+                    .eq('tenant_id', currentShopId); // 多商家支持
+                
+                if (error) {
+                    console.error('❌ 撤单失败:', error);
+                    showToast('❌ 撤单失败: ' + error.message, 'error');
+                    return;
+                }
+                
+                console.log('✅ 撤单成功');
+                showToast(`✅ 订单 #${orderNumber} 已取消`, 'success');
+                
+                // 刷新数据
+                setTimeout(async () => {
+                    await loadOrders();
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ 撤单失败:', error);
+                showToast('❌ 撤单失败: ' + error.message, 'error');
+            }
+        }
+        
+        // ============================================
+        // 更新统计数据 - 多商家支持
+        // ============================================
+        function updateStats() {
+            const newCount = allOrders.filter(o => o.status === '新订单').length;
+            const processingCount = allOrders.filter(o => o.status === '处理中').length;
+            const completedCount = allOrders.filter(o => o.status === '已完成').length;
+            const canceledCount = allOrders.filter(o => o.status === '已取消').length;
+            
+            console.log('📊 统计数据更新（商家', currentShopId, '）:', {
+                新订单: newCount,
+                处理中: processingCount,
+                已完成: completedCount,
+                已取消: canceledCount,
+                总订单: allOrders.length
+            });
+            
+            document.getElementById('totalOrders').textContent = allOrders.length;
+            document.getElementById('newOrders').textContent = newCount;
+            document.getElementById('processingOrders').textContent = processingCount;
+            
+            // 更新徽章
+            document.getElementById('newOrdersBadge').textContent = newCount;
+            document.getElementById('processingOrdersBadge').textContent = processingCount;
+            document.getElementById('completedOrdersBadge').textContent = completedCount;
+            
+            // 修复今日营收统计：只统计已完成订单的金额
+            const todayRevenue = allOrders
+                .filter(order => order.status === '已完成')
+                .reduce((sum, order) => {
+                    const amount = parseFloat(order.totalAmount) || 0;
+                    console.log(`订单 ${order.orderNumber}: 状态=${order.status}, 金额=${amount}`);
+                    return sum + amount;
+                }, 0);
+            
+            console.log('💰 今日营收统计（商家', currentShopId, '）:', {
+                已完成订单数: completedCount,
+                总营收: todayRevenue
+            });
+            
+            document.getElementById('todayRevenue').textContent = '¥' + todayRevenue.toFixed(2);
+        }
+        
+        // ============================================
+        // 🔥 清空今日数据函数 - 多商家支持
+        // ============================================
+        async function clearTodayStats() {
+            if (!confirm('⚠️ 确定要清空今日所有订单数据吗？\n\n这将：\n1. 删除当前商家所有订单记录\n2. 重置当前商家统计计数\n3. 不会影响其他商家\n4. 此操作不可恢复！')) {
+                return;
+            }
+            
+            try {
+                console.log('🗑️ 开始清空所有订单数据（商家:', currentShopId, '）...');
+                
+                const loadingOverlay = document.createElement('div');
+                loadingOverlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    color: white;
+                    font-size: 16px;
+                `;
+                loadingOverlay.innerHTML = `
+                    <div style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                    <p>正在删除订单数据...</p>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                document.body.appendChild(loadingOverlay);
+                
+                if (isCloudMode && supabaseClient) {
+                    // 🔥 云端模式：删除当前商家的所有订单
+                    console.log('🌐 从云端删除所有订单（商家:', currentShopId, '）...');
+                    
+                    // 直接删除当前商家的所有订单
+                    const { error: deleteError } = await supabaseClient
+                        .from('orders')
+                        .delete()
+                        .eq('tenant_id', currentShopId); // 只删除当前商家的订单
+                    
+                    if (deleteError) {
+                        console.error('❌ 删除订单失败:', deleteError);
+                        showToast('❌ 删除订单失败: ' + deleteError.message, 'error');
+                    } else {
+                        console.log('✅ 删除订单成功');
+                        showToast('✅ 成功删除当前商家所有订单', 'success');
+                    }
+                    
+                } else {
+                    // 🔥 本地模式：清除当前商家的本地存储订单
+                    console.log('📝 清除本地订单数据（商家:', currentShopId, '）...');
+                    
+                    // 只删除当前商家的订单
+                    const remainingOrders = localOrders.filter(order => order.tenant_id !== currentShopId);
+                    localStorage.setItem('localOrders', JSON.stringify(remainingOrders));
+                    localOrders = remainingOrders;
+                    
+                    showToast('✅ 本地订单数据已清除', 'success');
+                }
+                
+                // 🔥 清除内存中的数据
+                allOrders = [];
+                
+                // 🔥 重置所有统计数据
+                document.getElementById('totalOrders').textContent = '0';
+                document.getElementById('newOrders').textContent = '0';
+                document.getElementById('processingOrders').textContent = '0';
+                document.getElementById('todayRevenue').textContent = '¥0.00';
+                
+                // 🔥 重置徽章
+                document.getElementById('newOrdersBadge').textContent = '0';
+                document.getElementById('processingOrdersBadge').textContent = '0';
+                document.getElementById('completedOrdersBadge').textContent = '0';
+                
+                // 🔥 刷新订单列表显示
+                setTimeout(() => {
+                    displayOrders();
+                    updateStats();
+                }, 500);
+                
+                // 移除加载动画
+                setTimeout(() => {
+                    loadingOverlay.remove();
+                }, 1000);
+                
+                console.log('✅ 清空操作完成（商家:', currentShopId, ')');
+                
+            } catch (error) {
+                console.error('❌ 清空操作失败:', error);
+                showToast('❌ 清空失败: ' + error.message, 'error');
+                
+                // 确保移除加载动画
+                document.querySelectorAll('[style*="position: fixed; top: 0; left: 0"]').forEach(el => el.remove());
+            }
+        }
+        
+        // ============================================
+        // 测试连接函数 - 多商家支持
+        // ============================================
+        async function testConnection() {
+            const testStatus = document.getElementById('testStatus');
+            testStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 测试中...';
+            
+            try {
+                // 重新初始化连接
+                await initSupabase();
+                
+                if (isCloudMode) {
+                    testStatus.innerHTML = '<span style="color:#4CAF50"><i class="fas fa-check-circle"></i> 连接成功</span>';
+                    showToast('✅ Supabase连接测试成功', 'success');
+                    
+                    // 重新加载推荐菜品
+                    await loadRecommendations();
+                } else {
+                    testStatus.innerHTML = '<span style="color:#f44336"><i class="fas fa-times-circle"></i> 连接失败</span>';
+                }
+                
+            } catch (error) {
+                testStatus.innerHTML = '<span style="color:#f44336"><i class="fas fa-times-circle"></i> 测试失败</span>';
+                showToast('❌ 连接测试失败: ' + error.message, 'error');
+            }
+        }
+        
+        // ============================================
+        // 创建测试订单 - 多商家支持
+        // ============================================
+        async function createTestOrder() {
+            if (!isCloudMode || !supabaseClient) {
+                showToast('当前为本地模式，无法创建测试订单', 'warning');
+                return;
+            }
+            
+            try {
+                // 根据你的表结构创建测试订单 - 添加tenant_id
+                const testOrder = {
+                    order_number: 'TEST' + Date.now(),
+                    table: '测试桌',
+                    dishes: '测试菜品 × 1 = ¥10.00',
+                    total_amount: 10,
+                    status: '新订单',
+                    order_time: new Date().toLocaleString('zh-CN'),
+                    timestamp: Date.now(),
+                    tenant_id: currentShopId // 多商家支持
+                };
+                
+                console.log('测试订单数据（商家:', currentShopId, '）:', testOrder);
+                
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .insert([testOrder])
+                    .select();
+                
+                if (error) {
+                    console.error('❌ 创建测试订单失败:', error);
+                    showToast('❌ 创建测试订单失败: ' + error.message, 'error');
+                    return;
+                }
+                
+                console.log('✅ 测试订单创建成功（商家:', currentShopId, '）:', data[0]);
+                showToast('✅ 测试订单创建成功', 'success');
+                
+                // 刷新订单列表
+                setTimeout(() => loadOrders(), 1000);
+                
+            } catch (error) {
+                console.error('❌ 创建测试订单失败:', error);
+                showToast('❌ 创建测试订单失败: ' + error.message, 'error');
+            }
+        }
+        
+        // ============================================
+        // 查看本地订单 - 多商家支持
+        // ============================================
+        function showLocalOrders() {
+            // 过滤当前商家的本地订单
+            allOrders = localOrders.filter(order => order.tenant_id === currentShopId);
+            displayOrders();
+            updateStats();
+            showToast(`显示 ${allOrders.length} 个本地订单（商家: ${currentShopConfig.name}）`, 'info');
+        }
+        
+        // ============================================
+        // 推荐菜品管理函数 - 多商家支持
+        // ============================================
+        async function loadRecommendations() {
+            try {
+                console.log('📋 加载推荐菜品（商家:', currentShopId, '）...');
+                
+                if (!isCloudMode || !supabaseClient) {
+                    console.log('📝 当前为本地模式，无法管理推荐菜品');
+                    document.getElementById('recommendCount').textContent = '0';
+                    return;
+                }
+                
+                // 只加载当前商家的推荐菜品
+                const { data, error } = await supabaseClient
+                    .from('recommendations')
+                    .select('*')
+                    .eq('tenant_id', currentShopId) // 多商家支持
+                    .order('sort_order', { ascending: true });
+                
+                if (error) {
+                    console.error('❌ 加载推荐菜品失败:', error);
+                    showToast('加载推荐菜品失败', 'error');
+                    document.getElementById('recommendCount').textContent = '0';
+                    return;
+                }
+                
+                allRecommendations = data || [];
+                console.log('✅ 加载到推荐菜品（商家:', currentShopId, '）:', allRecommendations.length, '个');
+                
+                // 更新计数
+                document.getElementById('recommendCount').textContent = allRecommendations.length;
+                
+                // 显示推荐列表
+                displayRecommendations();
+                
+            } catch (error) {
+                console.error('❌ 加载推荐菜品异常:', error);
+                document.getElementById('recommendCount').textContent = '0';
+            }
+        }
+        
+        function displayRecommendations() {
+            const container = document.getElementById('recommendList');
+            if (!container) return;
+            
+            if (allRecommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-star"></i>
+                        <p>暂无推荐菜品</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">添加的推荐菜品将显示在顾客端首页</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 5px;">当前商家: ${currentShopConfig.name}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = allRecommendations.map(item => `
+                <div class="recommend-item" data-id="${item.id}">
+                    <div class="recommend-info">
+                        <div>
+                            <span class="recommend-name">${item.name}</span>
+                            <span class="recommend-price">¥${item.price}</span>
+                        </div>
+                        ${item.description ? `<div class="recommend-description">${item.description}</div>` : ''}
+                        <div style="font-size: 11px; color: #999; margin-top: 3px;">
+                            排序: ${item.sort_order || 0} | 创建: ${new Date(item.created_at).toLocaleDateString('zh-CN')}
+                        </div>
+                    </div>
+                    <div class="recommend-actions">
+                        <button class="btn-edit" onclick="editRecommendation('${item.id}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-delete" onclick="deleteRecommendation('${item.id}')">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function saveRecommendation() {
+            const name = document.getElementById('recommendName').value.trim();
+            const price = document.getElementById('recommendPrice').value.trim();
+            const description = document.getElementById('recommendDesc').value.trim();
+            const sortOrder = parseInt(document.getElementById('recommendSort').value) || 0;
+            
+            if (!name || !price) {
+                showToast('请填写菜品名称和价格', 'warning');
+                return;
+            }
+            
+            if (isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+                showToast('价格必须是正数', 'warning');
+                return;
+            }
+            
+            try {
+                const recommendData = {
+                    name: name,
+                    price: parseFloat(price),
+                    sort_order: sortOrder,
+                    updated_at: new Date().toISOString(),
+                    tenant_id: currentShopId // 多商家支持
+                };
+                
+                if (description) {
+                    recommendData.description = description;
+                }
+                
+                let result;
+                
+                if (editingRecommendId) {
+                    // 更新现有推荐 - 确保只能更新当前商家的推荐
+                    console.log('🔄 更新推荐菜品（商家:', currentShopId, '）:', editingRecommendId);
+                    const { data, error } = await supabaseClient
+                        .from('recommendations')
+                        .update(recommendData)
+                        .eq('id', editingRecommendId)
+                        .eq('tenant_id', currentShopId) // 多商家支持：确保只能更新当前商家的推荐
+                        .select();
+                    
+                    if (error) throw error;
+                    result = data[0];
+                    showToast('推荐菜品更新成功', 'success');
+                } else {
+                    // 新增推荐 - 添加tenant_id
+                    console.log('➕ 新增推荐菜品（商家:', currentShopId, ')');
+                    recommendData.created_at = new Date().toISOString();
+                    
+                    const { data, error } = await supabaseClient
+                        .from('recommendations')
+                        .insert([recommendData])
+                        .select();
+                    
+                    if (error) throw error;
+                    result = data[0];
+                    showToast('推荐菜品添加成功', 'success');
+                }
+                
+                // 重新加载推荐列表
+                await loadRecommendations();
+                
+                // 清空表单
+                clearRecommendForm();
+                
+                // 重置编辑状态
+                editingRecommendId = null;
+                
+            } catch (error) {
+                console.error('❌ 保存推荐菜品失败:', error);
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+        
+        function editRecommendation(id) {
+            const item = allRecommendations.find(r => r.id === id);
+            if (!item) return;
+            
+            editingRecommendId = id;
+            
+            document.getElementById('recommendName').value = item.name || '';
+            document.getElementById('recommendPrice').value = item.price || '';
+            document.getElementById('recommendDesc').value = item.description || '';
+            document.getElementById('recommendSort').value = item.sort_order || 0;
+            
+            // 滚动到表单
+            document.querySelector('.recommend-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showToast('正在编辑推荐菜品', 'info');
+        }
+        
+        async function deleteRecommendation(id) {
+            if (!confirm('确定要删除这个推荐菜品吗？')) {
+                return;
+            }
+            
+            try {
+                console.log('🗑️ 删除推荐菜品（商家:', currentShopId, '）:', id);
+                
+                // 确保只能删除当前商家的推荐
+                const { error } = await supabaseClient
+                    .from('recommendations')
+                    .delete()
+                    .eq('id', id)
+                    .eq('tenant_id', currentShopId); // 多商家支持
+                
+                if (error) throw error;
+                
+                showToast('推荐菜品删除成功', 'success');
+                
+                // 重新加载推荐列表
+                await loadRecommendations();
+                
+            } catch (error) {
+                console.error('❌ 删除推荐菜品失败:', error);
+                showToast('删除失败: ' + error.message, 'error');
+            }
+        }
+        
+        function clearRecommendForm() {
+            document.getElementById('recommendName').value = '';
+            document.getElementById('recommendPrice').value = '';
+            document.getElementById('recommendDesc').value = '';
+            document.getElementById('recommendSort').value = '0';
+            editingRecommendId = null;
+            
+            showToast('表单已清空', 'info');
+        }
+        
+        // ============================================
+        // 切换标签页函数（修复：正确显示推荐管理页面）
+        // ============================================
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // 移除所有 active 类
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 使用 data-tab 属性来识别
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 如果没有找到 active，使用 onclick 内容判断（回退方案）
+            if (!document.querySelector('.tab.active')) {
+                tabButtons.forEach(btn => {
+                    const onclickContent = btn.getAttribute('onclick') || '';
+                    if (onclickContent.includes(`'${tabName}'`) || onclickContent.includes(`"${tabName}"`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // 显示对应页面
+            if (tabName === 'recommend') {
+                document.getElementById('ordersContainer').style.display = 'none';
+                document.getElementById('recommendPage').style.display = 'block';
+            } else {
+                document.getElementById('ordersContainer').style.display = 'block';
+                document.getElementById('recommendPage').style.display = 'none';
+                displayOrders();
+            }
+        }
+        
+        // ============================================
+        // 辅助函数
+        // ============================================
+        function updateConnectionStatus(connected, message = '') {
+            const statusElement = document.getElementById('connectionStatus');
+            if (statusElement) {
+                if (connected) {
+                    statusElement.className = 'connection-status status-connected';
+                    statusElement.innerHTML = `<i class="fas fa-circle"></i> ${message || '云端已连接'}`;
+                } else {
+                    statusElement.className = 'connection-status status-disconnected';
+                    statusElement.innerHTML = `<i class="fas fa-circle"></i> ${message || '连接断开'}`;
+                }
+            }
+        }
+        
+        function updateLastUpdateTime() {
+            const element = document.getElementById('lastUpdateTime');
+            if (element) {
+                element.textContent = new Date().toLocaleTimeString('zh-CN');
+            }
+        }
+        
+        function showNewOrderNotification(count) {
+            const notification = document.getElementById('newOrderNotification');
+            const message = document.getElementById('notificationMessage');
+            if (notification && message) {
+                message.textContent = `有 ${count} 个新订单到达（${currentShopConfig.name}）！`;
+                notification.style.display = 'block';
+                
+                // 播放提示音
+                playNotificationSound();
+                
+                // 5秒后自动隐藏
+                setTimeout(() => hideNotification(), 5000);
+            }
+        }
+        
+        function hideNotification() {
+            const notification = document.getElementById('newOrderNotification');
+            if (notification) {
+                notification.style.display = 'none';
+            }
+        }
+        
+        function playNotificationSound() {
+            try {
+                // 创建简单的提示音
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+            } catch (e) {
+                console.log('音频播放失败，可能浏览器不支持');
+            }
+        }
+        
+        function showLoading() {
+            const container = document.getElementById('ordersContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>正在加载订单...</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">当前商家: ${currentShopConfig.name}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function showToast(message, type = 'success') {
+            // 移除已有的toast
+            document.querySelectorAll('.toast-message').forEach(toast => toast.remove());
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#ff9800' : '#f44336'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle';
+            toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+ 
+    // ============================================
+    // 管理端：动态加载商家菜品（可选功能）
+    // ============================================
+    async function loadShopDishesForAdmin() {
+        try {
+            console.log('🍽️ 管理端：开始加载商家菜品...');
+            
+            // 从Supabase加载菜品
+            const supabaseDishes = await loadShopDishesFromSupabase(currentShopId);
+            
+            if (supabaseDishes && supabaseDishes.length > 0) {
+                // 保存菜品数据，供其他功能使用
+                window.shopDishes = supabaseDishes;
+                console.log('✅ 管理端：已加载菜品数据:', supabaseDishes.length, '个菜品');
+                
+                // 可以在这里添加菜品显示或管理功能
+                // displayShopDishes(supabaseDishes);
+            } else {
+                console.log('📝 管理端：没有找到菜品数据');
+            }
+            
+        } catch (error) {
+            console.error('❌ 管理端：加载菜品失败:', error);
+        }
+    }
+    
+    // ============================================
+    // 显示商家菜品（可选，管理端菜品管理功能）
+    // ============================================
+    function displayShopDishes(dishes) {
+        // 这里可以添加菜品管理界面
+        console.log('显示菜品管理界面，菜品数量:', dishes.length);
+        
+        // 示例：在页面中添加菜品管理区域
+        const dishesContainer = document.createElement('div');
+        dishesContainer.id = 'dishesManagement';
+        dishesContainer.style.cssText = `
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        `;
+        
+        dishesContainer.innerHTML = `
+            <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-utensils"></i> 菜品管理 - ${currentShopConfig.name}
+            </h3>
+            <div style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                共 ${dishes.length} 个菜品
+            </div>
+            <div id="dishesList">
+                ${dishes.map(dish => `
+                    <div style="padding: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between;">
+                        <div>
+                            <span style="font-weight: 600;">${dish.name}</span>
+                            <span style="color: #ff6b6b; margin-left: 10px;">¥${dish.price}</span>
+                            <span style="font-size: 12px; color: #999; margin-left: 10px;">${dish.category}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px; color: ${dish.is_active ? '#4CAF50' : '#f44336'};">
+                                ${dish.is_active ? '已启用' : '已禁用'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="margin-top: 15px;">
+                <button onclick="addNewDish()" style="padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-plus"></i> 添加新菜品
+                </button>
+            </div>
+        `;
+        
+        // 将菜品管理区域插入到页面中
+        const ordersContainer = document.querySelector('.orders-container');
+        if (ordersContainer && ordersContainer.parentNode) {
+            ordersContainer.parentNode.insertBefore(dishesContainer, ordersContainer);
+        }
+    }
+    
+    // ============================================
+    // 添加新菜品（示例函数）
+    // ============================================
+    async function addNewDish() {
+        // 这里可以添加菜品添加功能
+        console.log('添加新菜品');
+        
+        // 示例：显示添加菜品表单
+        const dishName = prompt('请输入菜品名称:');
+        if (!dishName) return;
+        
+        const dishPrice = prompt('请输入菜品价格:');
+        if (!dishPrice || isNaN(parseFloat(dishPrice))) {
+            showToast('价格必须是数字', 'error');
+            return;
+        }
+        
+        try {
+            // 构建菜品数据
+            const newDish = {
+                name: dishName,
+                price: parseFloat(dishPrice),
+                emoji: '🍽️',
+                category: '未分类',
+                is_active: true,
+                sort_order: 0,
+                tenant_id: currentShopId,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            // 保存到Supabase
+            const { data, error } = await supabaseClient
+                .from('dishes')
+                .insert([newDish])
+                .select();
+            
+            if (error) throw error;
+            
+            console.log('✅ 菜品添加成功:', data[0]);
+            showToast('菜品添加成功', 'success');
+            
+            // 重新加载菜品
+            await loadShopDishesForAdmin();
+            
+        } catch (error) {
+            console.error('❌ 添加菜品失败:', error);
+            showToast('添加菜品失败: ' + error.message, 'error');
+        }
+    }
+       
+        // 页面卸载时清理订阅
+        window.addEventListener('beforeunload', function() {
+            if (realtimeSubscription && supabaseClient) {
+                supabaseClient.removeChannel(realtimeSubscription);
+                console.log('✅ 已关闭实时订阅');
+            }
+        });
+    </script>
+</body>
+</html>

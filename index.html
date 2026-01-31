@@ -1,0 +1,2571 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的摊位 - 扫码点餐</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 商家配置文件 -->
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --primary-color: #E63946;
+            --secondary-color: #F4A261;
+            --accent-color: #2A9D8F;
+            --light-bg: #FFF5F5;
+            --dark-text: #333333;
+            --light-text: #666666;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin: 60px 0 40px;
+        }
+        
+        .logo-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .logo-container h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--dark-text);
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+        
+        .sequence-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px 20px;
+            box-shadow: 0 5px 20px rgba(230, 57, 70, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid var(--light-bg);
+        }
+        
+        .sequence-number {
+            font-size: 56px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+        
+        .sequence-hint {
+            font-size: 14px;
+            color: var(--light-text);
+            margin-bottom: 25px;
+        }
+        
+        .waiting-info {
+            background: var(--light-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .waiting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        
+        .waiting-label {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+        
+        .waiting-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .smart-recommend {
+            background: linear-gradient(135deg, #FFF9E6, #FFF0F0);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .recommend-title {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .recommend-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(230, 57, 70, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .recommend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), #C62828);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+        }
+        
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--dark-text);
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .order-info {
+            text-align: center;
+        }
+        
+        .sequence-display {
+            font-weight: 600;
+            color: var(--dark-text);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .order-status {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+        
+        .cart-icon {
+            position: relative;
+            font-size: 22px;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .category-tabs {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 15px;
+            background: white;
+            gap: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .category-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--light-text);
+        }
+        
+        .category-tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .dishes-container {
+            padding: 15px;
+            display: grid;
+            gap: 15px;
+        }
+        
+        .dish-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .dish-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .dish-emoji {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #FFE5E5, #FFF3E0);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+        
+        .dish-details {
+            flex: 1;
+        }
+        
+        .dish-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--dark-text);
+            margin-bottom: 5px;
+        }
+        
+        .dish-price {
+            color: var(--primary-color);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .dish-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #e0e0e0;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .dish-quantity {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .bottom-cart-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 15px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            border-radius: 15px 15px 0 0;
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .cart-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-items-count {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+        
+        .cart-total {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .checkout-btn {
+            padding: 12px 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .checkout-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        
+        .checkout-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .checkout-title {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        .order-confirmation {
+            padding: 20px 15px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .order-info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: var(--light-text);
+            font-size: 14px;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        .order-items {
+            margin: 15px 0;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            margin-top: 10px;
+            border-top: 2px solid #f8f9fa;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .total-amount {
+            color: var(--primary-color);
+        }
+        
+        .payment-area {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .payment-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-text);
+        }
+        
+        .payment-tip {
+            font-size: 13px;
+            color: var(--light-text);
+            margin-bottom: 20px;
+        }
+        
+        .qrcode-wrapper {
+            width: 220px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+        
+        .qrcode-img {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+        }
+        
+        .qrcode-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .payment-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: #f8f9fa;
+            color: var(--dark-text);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-success {
+            flex: 1;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .success-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .success-icon {
+            font-size: 60px;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-text);
+        }
+        
+        .sequence-display-large {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+        
+        .success-message {
+            font-size: 16px;
+            color: var(--light-text);
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            color: var(--light-text);
+        }
+        
+        .status-value {
+            font-weight: 600;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .refresh-status-btn {
+            background: #E63946;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-status-btn:hover {
+            background: #C62828;
+            transform: translateY(-1px);
+        }
+        
+        .refresh-status-btn:active {
+            transform: translateY(0);
+        }
+        
+        .refresh-status-btn .fa-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .status-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--dark-text);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-height: 70vh;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        
+        .modal-header h3 {
+            font-size: 16px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            max-height: 40vh;
+        }
+        
+        .cart-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .cart-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #E63946;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        /* 返回商家列表链接 */
+        .back-to-shops {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .back-to-shops a {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        
+        .back-to-shops a:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        /* 支付方式按钮样式（新增） */
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .payment-method-btn {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+        }
+        
+        .payment-method-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .payment-method-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .payment-method-btn .fab {
+            font-size: 18px;
+        }
+        
+        /* 微信支付按钮特殊样式 */
+        .payment-method-btn:nth-child(1).active {
+            background: #07C160; /* 微信绿色 */
+            border-color: #07C160;
+        }
+        
+        /* 支付宝支付按钮特殊样式 */
+        .payment-method-btn:nth-child(2).active {
+            background: #00A0E9; /* 支付宝蓝色 */
+            border-color: #00A0E9;
+        }
+        
+        /* 新增：收款码错误提示样式 */
+        .qr-error-message {
+            text-align: center;
+            padding: 30px 20px;
+            background: #fff8f8;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px dashed #ffcccc;
+        }
+        
+        .qr-error-message i {
+            font-size: 40px;
+            color: #f44336;
+            margin-bottom: 15px;
+        }
+        
+        .qr-error-message h4 {
+            color: #f44336;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .qr-error-message p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顺序号页面 -->
+    <div id="sequencePage" class="page">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <img src="images/logo.png" alt="我的摊位" class="logo-image">
+            </div>
+            <h1>欢迎光临</h1>
+            <p class="subtitle">扫码点餐 · 凭号取餐</p>
+        </div>
+        
+        <div class="sequence-card">
+            <div style="font-size: 14px; color: var(--light-text);">
+                您的取餐号是
+            </div>
+            <div class="sequence-number" id="sequenceNumber">A001</div>
+            <div class="sequence-hint">
+                请记住此号码，凭号取餐
+            </div>
+            
+            <div class="waiting-info">
+                <div class="waiting-item">
+                    <span class="waiting-label">当前等待</span>
+                    <span class="waiting-value" id="waitingCount">约2-3单</span>
+                </div>
+                <div class="waiting-item">
+                    <span class="waiting-label">预计等待时间</span>
+                    <span class="waiting-value" id="waitingTime">8-12分钟</span>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="enterMenu()">
+                <i class="fas fa-utensils"></i> 开始点餐
+            </button>
+        </div>
+        
+        <div class="smart-recommend">
+            <div class="recommend-title">
+                <i class="fas fa-crown"></i> 今日推荐
+            </div>
+            <div id="recommendationsList">
+                <!-- 动态加载推荐菜品 -->
+                <div class="loading-recommend" style="text-align: center; padding: 20px; color: #999;">
+                    <i class="fas fa-spinner fa-spin"></i> 正在加载推荐菜品...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 返回商家列表链接 -->
+        <div class="back-to-shops">
+            <a href="shops.html">
+                <i class="fas fa-arrow-left"></i> 返回商家列表
+            </a>
+        </div>
+    </div>
+
+    <!-- 菜单页面 -->
+    <div id="menuPage" class="page hidden">
+        <div class="menu-header">
+            <button class="back-btn" onclick="backToSequence()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="order-info">
+                <div class="sequence-display" id="currentSequence">A001</div>
+                <div class="order-status" id="cartStatus">未选择菜品</div>
+            </div>
+            <div class="cart-icon" onclick="showCartModal()">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-badge" id="cartBadge">0</span>
+            </div>
+        </div>
+
+        <!-- 菜品分类 -->
+        <div class="category-tabs" id="categoryTabs">
+            <!-- 动态生成 -->
+        </div>
+
+        <!-- 菜品列表 -->
+        <div class="dishes-container" id="dishesContainer">
+            <!-- 动态生成 -->
+        </div>
+
+        <!-- 底部购物车栏 -->
+        <div class="bottom-cart-bar">
+            <div class="cart-summary">
+                <div>
+                    <div class="cart-items-count" id="cartItemsCount">0个菜品</div>
+                    <div class="cart-total">总计: ¥<span id="cartTotal">0</span></div>
+                </div>
+                <button class="checkout-btn" onclick="goToCheckout()" disabled id="checkoutBtn">
+                    去结算
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车弹窗 -->
+    <div id="cartModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>购物车</h3>
+                <button class="btn-close" onclick="hideCartModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <!-- 动态生成 -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>合计</span>
+                    <span>¥<span id="modalCartTotal">0</span></span>
+                </div>
+                <div class="cart-actions">
+                    <button class="btn-secondary" onclick="clearCart()">
+                        清空
+                    </button>
+                    <button class="btn-primary" onclick="goToCheckout()" id="modalCheckoutBtn" disabled>
+                        去结算
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结账页面 -->
+    <div id="checkoutPage" class="page hidden">
+        <div class="checkout-header">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="checkout-title">订单确认</div>
+        </div>
+        
+        <div class="order-confirmation">
+            <div class="order-card">
+                <div class="order-info-row">
+                    <span class="info-label">取餐号</span>
+                    <span class="info-value" id="checkoutSequence">A001</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="info-label">订单号</span>
+                    <span class="info-value" id="orderNumber">-</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="info-label">下单时间</span>
+                    <span class="info-value" id="orderTime">-</span>
+                </div>
+                
+                <div class="order-items" id="checkoutItems">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <div class="order-total">
+                    <span>应付金额</span>
+                    <span class="total-amount">¥<span id="finalAmount">0</span></span>
+                </div>
+            </div>
+            
+            <div class="payment-area">
+                <div class="payment-title">扫码支付</div>
+                <div class="payment-tip">请选择支付方式并扫描下方二维码</div>
+                
+                <!-- 收款码错误提示（新增） -->
+                <div id="qrErrorContainer" style="display: none;">
+                    <!-- 动态生成错误信息 -->
+                </div>
+                
+                <!-- 支付方式选择（新增） -->
+                <div class="payment-methods" id="paymentMethods" style="display: none; flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                    <button class="payment-method-btn active" id="paymentMethodWechat" onclick="switchPaymentMethod('wechat')">
+                        <i class="fab fa-weixin"></i> 微信支付
+                    </button>
+                    <button class="payment-method-btn" id="paymentMethodAlipay" onclick="switchPaymentMethod('alipay')">
+                        <i class="fab fa-alipay"></i> 支付宝支付
+                    </button>
+                </div>
+                
+                <div class="qrcode-wrapper" id="qrcodeWrapper">
+                    <img id="qrcodeImg" src="" alt="收款码" class="qrcode-img" style="display: none;">
+                    <div class="qrcode-overlay" style="display: none;">
+                        请支付 ¥<span id="qrcodeAmount">0</span>
+                    </div>
+                </div>
+                
+                <div class="payment-buttons">
+                    <button class="btn-secondary" onclick="backToMenu()">
+                        修改订单
+                    </button>
+                    <button class="btn-success" onclick="submitOrder()" id="submitOrderBtn" disabled>
+                        提交订单
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功页面 -->
+    <div id="successPage" class="page hidden">
+        <div class="success-page">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="success-title">订单提交成功！</h2>
+            <div class="sequence-display-large" id="successSequence">A001</div>
+            <p class="success-message">请凭此号码到摊位取餐</p>
+            
+            <div class="status-card">
+                <div class="status-header">
+                    <h3><i class="fas fa-info-circle"></i> 订单状态</h3>
+                    <button class="refresh-status-btn" onclick="refreshOrderStatus()" id="refreshBtn">
+                        <i class="fas fa-sync-alt" id="refreshIcon"></i> 刷新状态
+                    </button>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">订单状态</span>
+                    <span class="status-value" id="orderStatus">等待接单</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">前方等待</span>
+                    <span class="status-value" id="queueAhead">2单</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">预计取餐时间</span>
+                    <span class="status-value" id="pickupTime">18:45</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">最后更新</span>
+                    <span class="status-value" id="lastStatusUpdate">刚刚</span>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="newOrder()" style="margin-top: 20px;">
+                <i class="fas fa-plus"></i> 再来一单
+            </button>
+        </div>
+    </div>
+
+    <!-- 加载动画 -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>正在提交订单...</p>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+    // ============================================
+    // 全局变量和配置
+    // ============================================
+    window._cart = [];
+    window._dishesData = []; // 将在初始化时从商家配置加载
+    window.currentShopId = ''; // 当前商家ID
+    window.currentShopConfig = null; // 当前商家配置
+    window.shopPaymentQR = null; // 商家收款码配置
+    window.currentPaymentMethod = 'wechat'; // 当前支付方式
+
+// ============================================
+// 从Supabase动态加载商家菜品
+// ============================================
+async function loadShopDishesFromSupabase(shopId) {
+    try {
+        console.log('📋 从Supabase加载商家菜品，商家ID:', shopId);
+        
+        // 检查Supabase是否已连接
+        if (!window.supabaseClient || !window.isCloudConnected) {
+            console.log('📝 Supabase未连接，使用默认菜品');
+            return null;
+        }
+        
+        // 从Supabase加载商家的菜品
+        const { data: dishes, error } = await window.supabaseClient
+            .from('dishes')
+            .select('*')
+            .eq('tenant_id', shopId)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true });
+        
+        if (error) {
+            console.error('❌ 从Supabase加载菜品失败:', error);
+            return null;
+        }
+        
+        if (dishes && dishes.length > 0) {
+            console.log('✅ 从Supabase加载到菜品:', dishes.length, '个');
+            
+            // 转换数据格式
+            const formattedDishes = dishes.map(dish => ({
+                id: dish.id,
+                name: dish.name,
+                price: parseFloat(dish.price),
+                emoji: dish.emoji || '🍽️',
+                category: dish.category || '未分类',
+                tags: dish.tags || [],
+                description: dish.description || ''
+            }));
+            
+            return formattedDishes;
+        }
+        
+        console.log('📝 Supabase中没有找到菜品');
+        return null;
+        
+    } catch (error) {
+        console.error('❌ 加载菜品异常:', error);
+        return null;
+    }
+}
+    
+    // Supabase配置
+    const SUPABASE_URL = 'https://slonbvmhsxqgpoodwazj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsb25idm1oc3hxZ3Bvb2R3YXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzMyNjQsImV4cCI6MjA4NDYwOTI2NH0.YLZqdnZl1vDTOrT6bzi2ulN1BGRxKGyW30AuccuWJq4';
+    
+    // 顺序号管理
+    window.sequenceNumber = '';
+    window.sequencePrefix = 'A';
+    window.sequenceCounter = 1;
+    window.currentOrderNumber = '';
+    window.lastOrderTimestamp = 0;
+    
+    // Supabase客户端
+    window.supabaseClient = null;
+    window.isCloudConnected = false;
+    window.orderStatusInterval = null;
+    
+    // ============================================
+// 初始化函数 - 多商家支持
+// ============================================
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 系统初始化...');
+    
+    // 1. 获取当前商家配置
+    window.currentShopId = getCurrentShopId();
+    window.currentShopConfig = getCurrentShopConfig();
+    
+    console.log('🏪 当前商家:', window.currentShopConfig.name, 'ID:', window.currentShopId);
+    
+    // 2. 更新页面主题
+    updateThemeForShop(window.currentShopConfig);
+    
+    // 3. 初始化Supabase连接
+    await initSupabaseConnection();
+    
+    // 4. 🔥 新增：获取商家收款码配置（如果已连接云端）
+    if (window.isCloudConnected) {
+        await fetchShopPaymentQR();
+    }
+    
+    // 5. 生成顺序号
+    await generateSequenceNumber();
+    
+    // 6. 动态加载菜品（优先从Supabase加载）
+    await loadShopDishes();
+    
+    // 7. 初始化菜品分类
+    initCategories();
+    
+    // 8. 加载菜品显示
+    loadDishes();
+    
+    // 9. 加载推荐菜品（从Supabase）- 优先加载
+    await loadRecommendations();
+    
+    // 10. 更新等待信息
+    updateWaitingInfo();
+    
+    console.log('✅ 系统初始化完成');
+});
+
+// ============================================
+// 获取商家收款码配置（新增函数）
+// ============================================
+async function fetchShopPaymentQR() {
+    try {
+        if (!window.supabaseClient || !window.isCloudConnected || !window.currentShopId) {
+            console.log('📝 无法获取收款码：未连接云端或无商家ID');
+            window.shopPaymentQR = null;
+            return;
+        }
+        
+        console.log('📱 获取商家收款码配置，商家ID:', window.currentShopId);
+        
+        // 从Supabase的shops表获取商家配置
+        const { data: shopData, error } = await window.supabaseClient
+            .from('shops')
+            .select('wechat_qr_url, alipay_qr_url, name')
+            .eq('tenant_id', window.currentShopId)
+            .single();
+        
+        if (error) {
+            console.warn('⚠️ 获取商家收款码失败:', error.message);
+            console.log('错误详情:', error);
+            window.shopPaymentQR = null;
+            return;
+        }
+        
+        if (shopData) {
+            console.log('✅ 获取到商家收款码配置:', {
+                微信收款码: shopData.wechat_qr_url,
+                支付宝收款码: shopData.alipay_qr_url
+            });
+            
+            // 保存到全局变量中
+            window.shopPaymentQR = {
+                wechat: shopData.wechat_qr_url,
+                alipay: shopData.alipay_qr_url,
+                shopName: shopData.name
+            };
+        } else {
+            console.log('📝 商家未配置收款码');
+            window.shopPaymentQR = null;
+        }
+        
+    } catch (error) {
+        console.error('❌ 获取收款码配置异常:', error);
+        window.shopPaymentQR = null;
+    }
+}
+    
+    // ============================================
+    // 动态加载商家菜品
+    // ============================================
+    async function loadShopDishes() {
+        try {
+            console.log('🍽️ 开始加载商家菜品...');
+            
+            // 先尝试从Supabase加载
+            const supabaseDishes = await loadShopDishesFromSupabase(window.currentShopId);
+            
+            if (supabaseDishes && supabaseDishes.length > 0) {
+                // 使用Supabase中的菜品数据
+                window._dishesData = supabaseDishes;
+                console.log('✅ 使用Supabase菜品数据:', supabaseDishes.length, '个菜品');
+            } else {
+                // 如果Supabase没有数据，使用商家配置中的菜品
+                window._dishesData = window.currentShopConfig.dishes || [];
+                console.log('📝 使用商家配置中的菜品数据:', window._dishesData.length, '个菜品');
+            }
+            
+            // 如果没有菜品，显示提示
+            if (window._dishesData.length === 0) {
+                console.warn('⚠️ 没有找到任何菜品数据');
+                showToast('当前商家暂无菜品', 'warning');
+            }
+            
+        } catch (error) {
+            console.error('❌ 加载菜品失败:', error);
+            
+            // 出错时使用商家配置中的菜品
+            window._dishesData = window.currentShopConfig.dishes || [];
+            console.log('📝 出错时使用商家配置中的菜品数据:', window._dishesData.length, '个菜品');
+        }
+    }
+    
+    // ============================================
+    // 生成顺序号（从云端获取）- 多商家支持
+    // ============================================
+    async function generateSequenceNumber() {
+    try {
+        console.log('🎫 开始生成取餐码，商家:', window.currentShopId);
+        
+        if (window.supabaseClient && window.isCloudConnected) {
+            console.log('🌐 从云端获取取餐码配置...');
+            
+            // 获取前缀 - 根据当前商家过滤
+            const [prefixResult, counterResult] = await Promise.all([
+                window.supabaseClient
+                    .from('settings')
+                    .select('setting_value')
+                    .eq('setting_key', 'sequence_prefix')
+                    .eq('tenant_id', window.currentShopId)
+                    .maybeSingle(),
+                
+                window.supabaseClient
+                    .from('settings')
+                    .select('setting_value')
+                    .eq('setting_key', 'sequence_counter')
+                    .eq('tenant_id', window.currentShopId)
+                    .maybeSingle()
+            ]);
+            
+            // 🔥 如果前缀不是A-Z，自动修正为A
+            let prefix = prefixResult.data?.setting_value || 'A';
+            if (!/^[A-Z]$/.test(prefix)) {
+                prefix = 'A';
+                console.log('⚠️ 前缀格式不正确，自动修正为 A');
+            }
+            
+            window.sequencePrefix = prefix;
+            window.sequenceCounter = parseInt(counterResult.data?.setting_value) || 1;
+            
+            console.log('✅ 从云端获取配置（商家:', window.currentShopId, '）:', {
+                prefix: window.sequencePrefix,
+                counter: window.sequenceCounter
+            });
+            
+        } else {
+            console.log('📝 使用本地配置（商家:', window.currentShopId, '）');
+            // 从本地存储获取（按商家区分）
+            const savedCounter = localStorage.getItem(`${window.currentShopId}_sequenceCounter`);
+            const savedPrefix = localStorage.getItem(`${window.currentShopId}_sequencePrefix`) || 'A';
+            
+            if (savedCounter) {
+                window.sequenceCounter = parseInt(savedCounter);
+                window.sequencePrefix = /^[A-Z]$/.test(savedPrefix) ? savedPrefix : 'A';
+            } else {
+                window.sequencePrefix = 'A';
+                window.sequenceCounter = 1;
+            }
+        }
+        
+        // 如果超过999，递增前缀，重置计数器
+        if (window.sequenceCounter > 999) {
+            const nextChar = String.fromCharCode(window.sequencePrefix.charCodeAt(0) + 1);
+            window.sequencePrefix = /^[A-Z]$/.test(nextChar) ? nextChar : 'A';
+            window.sequenceCounter = 1;
+        }
+        
+        // 生成顺序号
+        window.sequenceNumber = window.sequencePrefix + 
+            window.sequenceCounter.toString().padStart(3, '0');
+        
+        console.log('🎫 生成的顺序号（商家:', window.currentShopId, '）:', window.sequenceNumber);
+        
+        // 递增计数器并保存
+        const nextCounter = window.sequenceCounter + 1;
+        
+        if (window.supabaseClient && window.isCloudConnected) {
+            try {
+                // 更新云端计数器 - 确保按商家更新
+                const { error: updateError } = await window.supabaseClient
+                    .from('settings')
+                    .update({ 
+                        setting_value: nextCounter.toString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('setting_key', 'sequence_counter')
+                    .eq('tenant_id', window.currentShopId);
+                
+                if (updateError) {
+                    console.warn('云端计数器更新失败:', updateError.message);
+                    // 回退到本地存储
+                    localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
+                    localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+                } else {
+                    console.log('✅ 云端计数器已更新（商家:', window.currentShopId, '）:', nextCounter);
+                }
+            } catch (updateError) {
+                console.error('更新云端计数器异常:', updateError);
+                // 回退到本地存储
+                localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
+                localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+            }
+        } else {
+            // 本地模式
+            localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
+            localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+        }
+        
+        window.sequenceCounter = nextCounter;
+        
+        // 更新所有显示顺序号的地方
+        updateSequenceNumberDisplay();
+        
+    } catch (error) {
+        console.error('❌ 生成顺序号失败:', error);
+        
+        // 紧急回退方案
+        const savedCounter = localStorage.getItem(`${window.currentShopId}_sequenceCounter`);
+        const savedPrefix = localStorage.getItem(`${window.currentShopId}_sequencePrefix`) || 'A';
+        
+        if (savedCounter) {
+            window.sequenceCounter = parseInt(savedCounter);
+            window.sequencePrefix = /^[A-Z]$/.test(savedPrefix) ? savedPrefix : 'A';
+        } else {
+            window.sequencePrefix = 'A';
+            window.sequenceCounter = 1;
+        }
+        
+        // 生成顺序号
+        window.sequenceNumber = window.sequencePrefix + 
+            window.sequenceCounter.toString().padStart(3, '0');
+            
+        // 递增计数器
+        window.sequenceCounter++;
+        localStorage.setItem(`${window.currentShopId}_sequenceCounter`, window.sequenceCounter.toString());
+        localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+        
+        updateSequenceNumberDisplay();
+    }
+}
+    
+    // ============================================
+    // 监听取餐码配置变化 - 多商家支持
+    // ============================================
+    function setupSequenceWatch() {
+        if (!window.supabaseClient || !window.isCloudConnected) return;
+        
+        try {
+            console.log('📡 启动取餐码配置监听...');
+            
+            window.supabaseClient
+                .channel('settings-channel')
+                .on('postgres_changes', 
+                    { 
+                        event: 'UPDATE', 
+                        schema: 'public', 
+                        table: 'settings',
+                        filter: 'setting_key=in.(sequence_prefix,sequence_counter)'
+                    }, 
+                    async (payload) => {
+                        // 只监听当前商家的配置变化
+                        if (payload.new.tenant_id === window.currentShopId) {
+                            console.log('📡 检测到取餐码配置更新:', payload.new);
+                            
+                            // 重新生成取餐码
+                            await generateSequenceNumber();
+                            
+                            showToast('✅ 取餐码已更新', 'success');
+                        }
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('✅ 取餐码配置监听已启动');
+                    }
+                });
+            
+        } catch (error) {
+            console.error('❌ 启动取餐码监听失败:', error);
+        }
+    }
+    
+    // ============================================
+    // Supabase连接初始化（添加取餐码监听）
+    // ============================================
+    async function initSupabaseConnection() {
+        try {
+            if (typeof supabase === 'undefined') {
+                console.error('Supabase SDK 未加载');
+                window.isCloudConnected = false;
+                return;
+            }
+            
+            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase 客户端初始化成功');
+            
+            // 测试连接 - 注意：加上tenant_id条件
+            const { error } = await window.supabaseClient
+                .from('orders')
+                .select('*')
+                .eq('tenant_id', window.currentShopId) // 多商家支持
+                .limit(1);
+            
+            if (error) {
+                console.warn('数据库连接测试失败:', error.message);
+                window.isCloudConnected = false;
+            } else {
+                console.log('数据库连接测试成功');
+                window.isCloudConnected = true;
+                
+                // 🔥 启动取餐码配置监听
+                setupSequenceWatch();
+            }
+            
+        } catch (error) {
+            console.error('Supabase初始化失败:', error);
+            window.isCloudConnected = false;
+        }
+    }
+    
+    // ============================================
+    // 加载推荐菜品（从Supabase）- 多商家支持
+    // ============================================
+    async function loadRecommendations() {
+        try {
+            console.log('📋 加载推荐菜品...');
+            const recommendContainer = document.getElementById('recommendationsList');
+            
+            if (!recommendContainer) {
+                console.error('❌ 推荐菜品容器未找到');
+                return;
+            }
+            
+            // 显示加载状态
+            recommendContainer.innerHTML = '<div class="loading-recommend" style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-spinner fa-spin"></i> 正在加载推荐菜品...</div>';
+            
+            // 检查Supabase连接
+            if (!window.supabaseClient || !window.isCloudConnected) {
+                console.log('📝 Supabase未连接，使用默认推荐');
+                // 使用默认推荐
+                updateRecommendationsDisplay([
+                    { name: '招牌菜品', price: 15, description: '今日特惠' },
+                    { name: '人气套餐', price: 18, description: '人气推荐' }
+                ]);
+                return;
+            }
+            
+            // 从Supabase的recommendations表获取推荐菜品 - 加上tenant_id条件
+            const { data, error } = await window.supabaseClient
+                .from('recommendations')
+                .select('*')
+                .eq('tenant_id', window.currentShopId) // 多商家支持：只获取当前商家的推荐
+                .order('sort_order', { ascending: true })
+                .limit(5);
+            
+            if (error) {
+                console.warn('❌ 获取推荐菜品失败:', error.message);
+                console.log('错误详情:', error);
+                
+                // 使用默认推荐
+                updateRecommendationsDisplay([
+                    { name: '招牌菜品', price: 15, description: '今日特惠' },
+                    { name: '人气套餐', price: 18, description: '人气推荐' }
+                ]);
+                return;
+            }
+            
+            if (data && data.length > 0) {
+                console.log('✅ 加载到推荐菜品:', data.length, '个');
+                console.log('推荐菜品数据:', data);
+                
+                // 转换数据格式
+                const recommendations = data.map(item => ({
+                    name: item.name,
+                    price: item.price,
+                    description: item.description || '',
+                    sort_order: item.sort_order || 0
+                }));
+                
+                updateRecommendationsDisplay(recommendations);
+            } else {
+                console.log('📝 无推荐菜品，使用默认');
+                updateRecommendationsDisplay([
+                    { name: '招牌菜品', price: 15, description: '今日特惠' },
+                    { name: '人气套餐', price: 18, description: '人气推荐' }
+                ]);
+            }
+            
+        } catch (error) {
+            console.error('❌ 加载推荐菜品异常:', error);
+            
+            // 使用默认推荐
+            updateRecommendationsDisplay([
+                { name: '招牌菜品', price: 15, description: '今日特惠' },
+                { name: '人气套餐', price: 18, description: '人气推荐' }
+            ]);
+        }
+    }
+    
+    // 更新推荐显示
+    function updateRecommendationsDisplay(recommendations) {
+        const recommendContainer = document.getElementById('recommendationsList');
+        if (!recommendContainer) return;
+        
+        // 清空现有推荐
+        recommendContainer.innerHTML = '';
+        
+        if (!recommendations || recommendations.length === 0) {
+            recommendContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">暂无推荐菜品</div>';
+            return;
+        }
+        
+        // 添加推荐菜品
+        recommendations.forEach(item => {
+            const recommendItem = document.createElement('div');
+            recommendItem.className = 'recommend-item';
+            
+            // 为推荐菜品添加点击事件
+            recommendItem.onclick = function() {
+                // 尝试在菜品列表中查找匹配的菜品
+                const dish = window._dishesData.find(d => {
+                    // 检查菜品名称是否包含推荐名称（忽略空格和特殊字符）
+                    const dishName = d.name.replace(/\s+/g, '');
+                    const recommendName = item.name.replace(/\s+/g, '');
+                    return dishName.includes(recommendName) || recommendName.includes(dishName);
+                });
+                
+                if (dish) {
+                    // 找到对应菜品，添加到购物车
+                    addRecommendation(dish.name);
+                    showToast(`已添加 ${item.name}`, 'success');
+                } else {
+                    // 没有找到完全匹配的菜品，尝试添加到自定义菜品
+                    console.log('未找到匹配菜品，尝试添加到自定义:', item.name);
+                    addCustomRecommendation(item);
+                }
+            };
+            
+            // 显示名称和价格
+            let displayText = item.name;
+            if (item.description && item.description.trim() !== '') {
+                displayText += ` (${item.description})`;
+            }
+            
+            recommendItem.innerHTML = `
+                <span>${displayText}</span>
+                <span style="color: var(--primary-color); font-weight: bold;">¥${item.price}</span>
+            `;
+            
+            recommendContainer.appendChild(recommendItem);
+        });
+    }
+    
+    // 添加自定义推荐菜品到购物车
+    function addCustomRecommendation(item) {
+        // 生成一个临时的菜品ID（使用负数避免与现有菜品冲突）
+        const tempId = -Date.now();
+        
+        // 检查是否已经在购物车中
+        const existingItem = window._cart.find(cartItem => 
+            cartItem.name === item.name && cartItem.isCustom
+        );
+        
+        if (existingItem) {
+            // 如果已存在，增加数量
+            existingItem.quantity++;
+        } else {
+            // 添加到购物车
+            window._cart.push({
+                id: tempId,
+                name: item.name,
+                price: item.price,
+                quantity: 1,
+                isCustom: true,
+                description: item.description || ''
+            });
+        }
+        
+        updateCartDisplay();
+        showToast(`已添加 ${item.name}`, 'success');
+    }
+    
+    // ============================================
+// 刷新订单状态函数 - 多商家支持
+// ============================================
+async function refreshOrderStatus() {
+    try {
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshIcon = document.getElementById('refreshIcon');
+        const orderNumber = window.currentOrderNumber;
+        
+        if (!orderNumber) {
+            console.log('❌ 未找到当前订单号');
+            showToast('请先提交订单', 'error');
+            return;
+        }
+        
+        // 显示刷新动画
+        refreshBtn.disabled = true;
+        refreshIcon.classList.add('fa-spin');
+        
+        console.log('🔄 刷新订单状态:', orderNumber);
+        
+        if (!window.supabaseClient || !window.isCloudConnected) {
+            console.log('📝 使用模拟数据');
+            // 模拟数据
+            const statuses = ['等待接单', '处理中', '已完成', '已取消'];
+            const randomStatus = statuses[Math.floor(Math.random() * 3)]; // 不包括已取消
+            const randomQueue = Math.floor(Math.random() * 5);
+            
+            document.getElementById('orderStatus').textContent = randomStatus;
+            document.getElementById('queueAhead').textContent = randomQueue + '单';
+            
+            // 计算预计取餐时间
+            const now = new Date();
+            const minutes = (randomQueue + 1) * 5; // 每单5分钟
+            const pickupTime = new Date(now.getTime() + minutes * 60000);
+            document.getElementById('pickupTime').textContent = 
+                pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+                pickupTime.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+            
+            showToast('订单状态已更新', 'success');
+        } else {
+            // 从Supabase获取当前订单状态 - 加上tenant_id条件
+            const { data: orderData, error: orderError } = await window.supabaseClient
+                .from('orders')
+                .select('status, timestamp, table')
+                .eq('order_number', orderNumber)
+                .eq('tenant_id', window.currentShopId) // 多商家支持
+                .single();
+            
+            if (orderError) {
+                console.error('❌ 获取订单状态失败:', orderError);
+                showToast('获取订单状态失败', 'error');
+            } else if (orderData) {
+                console.log('✅ 获取到订单状态:', orderData);
+                
+                // 更新订单状态
+                document.getElementById('orderStatus').textContent = orderData.status || '等待接单';
+                
+                // 🔥 获取商家端所有新订单+处理中订单数量（累加求和）- 加上tenant_id条件
+                const { data: pendingOrders, error: pendingError } = await window.supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .eq('tenant_id', window.currentShopId) // 多商家支持：只查询当前商家的订单
+                    .in('status', ['新订单', '处理中'])
+                    .order('timestamp', { ascending: true });
+                
+                if (!pendingError && pendingOrders) {
+                    // 计算前方等待订单数：所有新订单+处理中订单中，时间戳早于当前订单的数量
+                    const queueCount = pendingOrders.filter(order => 
+                        order.timestamp < orderData.timestamp && 
+                        order.order_number !== orderNumber
+                    ).length;
+                    
+                    console.log('📊 前方等待订单计算:', {
+                        总待处理订单: pendingOrders.length,
+                        当前订单时间戳: orderData.timestamp,
+                        前方等待订单数: queueCount
+                    });
+                    
+                    document.getElementById('queueAhead').textContent = queueCount + '单';
+                    
+                    // 计算预计取餐时间（每单5分钟）
+                    const now = new Date();
+                    const minutes = (queueCount + 1) * 5; // 当前订单也要5分钟
+                    const pickupTime = new Date(now.getTime() + minutes * 60000);
+                    document.getElementById('pickupTime').textContent = 
+                        pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+                        pickupTime.getMinutes().toString().padStart(2, '0');
+                } else {
+                    // 如果查询失败，使用默认值
+                    document.getElementById('queueAhead').textContent = '2单';
+                    const now = new Date();
+                    const pickupTime = new Date(now.getTime() + 15 * 60000);
+                    document.getElementById('pickupTime').textContent = 
+                        pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+                        pickupTime.getMinutes().toString().padStart(2, '0');
+                }
+                
+                document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+                
+                // 如果订单已完成或已取消，停止自动刷新
+                if (orderData.status === '已完成' || orderData.status === '已取消') {
+                    if (window.orderStatusInterval) {
+                        clearInterval(window.orderStatusInterval);
+                        window.orderStatusInterval = null;
+                        showToast('订单已' + orderData.status + '，停止自动刷新', 'success');
+                    }
+                } else {
+                    showToast('订单状态已更新', 'success');
+                }
+            } else {
+                showToast('未找到订单信息', 'warning');
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ 刷新订单状态异常:', error);
+        showToast('刷新失败', 'error');
+    } finally {
+        // 恢复按钮状态
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshIcon = document.getElementById('refreshIcon');
+        if (refreshBtn) refreshBtn.disabled = false;
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+    }
+}
+    
+    // ============================================
+    // 在成功页面启动自动刷新
+    // ============================================
+    function startAutoRefresh() {
+        // 先执行一次刷新
+        refreshOrderStatus();
+        
+        // 设置定时刷新（每30秒一次）
+        if (window.orderStatusInterval) {
+            clearInterval(window.orderStatusInterval);
+        }
+        
+        window.orderStatusInterval = setInterval(() => {
+            refreshOrderStatus();
+        }, 30000); // 30秒
+        
+        console.log('⏰ 启动自动刷新，间隔30秒');
+    }
+    
+    // 更新顺序号显示
+    function updateSequenceNumberDisplay() {
+        document.getElementById('sequenceNumber').textContent = window.sequenceNumber;
+        document.getElementById('currentSequence').textContent = window.sequenceNumber;
+        document.getElementById('checkoutSequence').textContent = window.sequenceNumber;
+        document.getElementById('successSequence').textContent = window.sequenceNumber;
+    }
+    
+    // 初始化菜品分类
+    function initCategories() {
+        const categoryTabs = document.getElementById('categoryTabs');
+        if (!categoryTabs) return;
+        
+        // 获取所有分类
+        const categories = ['全部', ...new Set(window._dishesData.map(dish => dish.category))];
+        
+        categoryTabs.innerHTML = categories.map(category => 
+            `<button class="category-tab ${category === '全部' ? 'active' : ''}" 
+                    onclick="filterDishes('${category}')">
+                ${category}
+            </button>`
+        ).join('');
+    }
+    
+    // 过滤菜品
+    function filterDishes(category) {
+        // 更新标签状态
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // 加载对应分类的菜品
+        loadDishes(category === '全部' ? null : category);
+    }
+    
+    // 加载菜品
+    function loadDishes(category = null) {
+        const dishesContainer = document.getElementById('dishesContainer');
+        if (!dishesContainer) return;
+        
+        // 过滤菜品
+        const filteredDishes = category 
+            ? window._dishesData.filter(dish => dish.category === category)
+            : window._dishesData;
+        
+        // 生成菜品HTML
+        dishesContainer.innerHTML = filteredDishes.map(dish => {
+            const cartItem = window._cart.find(item => item.id === dish.id);
+            const quantity = cartItem ? cartItem.quantity : 0;
+            
+            return `
+            <div class="dish-card">
+                <div class="dish-emoji">${dish.emoji}</div>
+                <div class="dish-details">
+                    <div class="dish-name">${dish.name}</div>
+                    <div class="dish-price">¥${dish.price}</div>
+                    <div class="dish-actions">
+                        <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})" ${quantity === 0 ? 'disabled style="opacity:0.3"' : ''}>
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="dish-quantity">${quantity}</span>
+                        <button class="quantity-btn" onclick="increaseQuantity(${dish.id})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+    
+    // 增加菜品数量
+    function increaseQuantity(dishId) {
+        const dish = window._dishesData.find(d => d.id === dishId);
+        if (!dish) return;
+        
+        const cartItem = window._cart.find(item => item.id === dishId);
+        if (cartItem) {
+            cartItem.quantity++;
+        } else {
+            window._cart.push({
+                id: dish.id,
+                name: dish.name,
+                price: dish.price,
+                quantity: 1
+            });
+        }
+        
+        updateCartDisplay();
+        loadDishes(); // 刷新菜品列表
+    }
+    
+    // 减少菜品数量
+    function decreaseQuantity(dishId) {
+        const cartItem = window._cart.find(item => item.id === dishId);
+        if (!cartItem) return;
+        
+        if (cartItem.quantity > 1) {
+            cartItem.quantity--;
+        } else {
+            window._cart = window._cart.filter(item => item.id !== dishId);
+        }
+        
+        updateCartDisplay();
+        loadDishes(); // 刷新菜品列表
+    }
+    
+    // 更新购物车显示
+    function updateCartDisplay() {
+        const totalItems = window._cart.reduce((sum, item) => sum + item.quantity, 0);
+        const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // 更新购物车徽章
+        document.getElementById('cartBadge').textContent = totalItems;
+        
+        // 更新购物车状态
+        document.getElementById('cartStatus').textContent = totalItems > 0 ? `已选 ${totalItems} 个菜品` : '未选择菜品';
+        
+        // 更新底部购物车栏
+        document.getElementById('cartItemsCount').textContent = `${totalItems}个菜品`;
+        document.getElementById('cartTotal').textContent = totalAmount.toFixed(2);
+        
+        // 更新结账按钮状态
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const modalCheckoutBtn = document.getElementById('modalCheckoutBtn');
+        if (checkoutBtn) checkoutBtn.disabled = totalItems === 0;
+        if (modalCheckoutBtn) modalCheckoutBtn.disabled = totalItems === 0;
+        
+        // 更新购物车弹窗
+        updateCartModal();
+    }
+    
+    // 更新购物车弹窗
+    function updateCartModal() {
+        const cartItems = document.getElementById('cartItems');
+        const modalCartTotal = document.getElementById('modalCartTotal');
+        
+        if (!cartItems) return;
+        
+        const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        modalCartTotal.textContent = totalAmount.toFixed(2);
+        
+        if (window._cart.length === 0) {
+            cartItems.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">购物车是空的</div>';
+            return;
+        }
+        
+        cartItems.innerHTML = window._cart.map(item => `
+            <div class="cart-item">
+                <div class="item-info">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">¥${item.price} × ${item.quantity}</div>
+                </div>
+                <div class="item-actions">
+                    <button onclick="decreaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span style="min-width:30px;text-align:center;">${item.quantity}</span>
+                    <button onclick="increaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // 清空购物车
+    function clearCart() {
+        if (window._cart.length === 0) return;
+        if (confirm('确定要清空购物车吗？')) {
+            window._cart = [];
+            updateCartDisplay();
+            loadDishes();
+            hideCartModal();
+        }
+    }
+    
+    // 添加推荐菜品
+    function addRecommendation(dishName) {
+        const dish = window._dishesData.find(d => d.name === dishName);
+        if (dish) {
+            increaseQuantity(dish.id);
+        }
+    }
+    
+    // ============================================
+    // 页面导航函数
+    // ============================================
+    window.enterMenu = function() {
+        // 从顺序号页面切换到菜单页面
+        switchPage('sequencePage', 'menuPage');
+    };
+    
+    window.backToSequence = function() {
+        if (window._cart.length > 0 && !confirm('返回将清空购物车，确定要返回吗？')) {
+            return;
+        }
+        window._cart = [];
+        updateCartDisplay();
+        loadDishes();
+        switchPage('menuPage', 'sequencePage');
+    };
+    
+    window.backToMenu = function() {
+        // 从结账页面返回菜单页面
+        switchPage('checkoutPage', 'menuPage');
+    };
+    
+    window.showCartModal = function() {
+        // 显示购物车弹窗
+        document.getElementById('cartModal').classList.remove('hidden');
+    };
+    
+    window.hideCartModal = function() {
+        // 隐藏购物车弹窗
+        document.getElementById('cartModal').classList.add('hidden');
+    };
+    
+    // ============================================
+    // 更新二维码显示（修改后的函数）
+    // ============================================
+    function updateQRCodeDisplay() {
+        const qrcodeImg = document.getElementById('qrcodeImg');
+        const qrcodeAmount = document.getElementById('qrcodeAmount');
+        const qrcodeOverlay = document.querySelector('.qrcode-overlay');
+        const qrcodeWrapper = document.getElementById('qrcodeWrapper');
+        const paymentMethods = document.getElementById('paymentMethods');
+        const qrErrorContainer = document.getElementById('qrErrorContainer');
+        const submitOrderBtn = document.getElementById('submitOrderBtn');
+        
+        if (!qrcodeImg || !qrErrorContainer) return false;
+        
+        const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        qrcodeAmount.textContent = totalAmount.toFixed(2);
+        
+        // 清空错误容器
+        qrErrorContainer.innerHTML = '';
+        qrErrorContainer.style.display = 'none';
+        
+        // 检查是否有商家收款码配置
+        if (window.shopPaymentQR) {
+            const { wechat, alipay, shopName } = window.shopPaymentQR;
+            
+            // 🔥 检查是否有有效的收款码
+            const hasWechatQR = wechat && wechat.trim() !== '';
+            const hasAlipayQR = alipay && alipay.trim() !== '';
+            
+            if (!hasWechatQR && !hasAlipayQR) {
+                // 两种收款码都没有，显示错误信息
+                showQRCodeError("商家尚未配置收款码", "请联系商家上传微信或支付宝收款码后再下单");
+                submitOrderBtn.disabled = true;
+                return false;
+            }
+            
+            // 隐藏二维码容器，等待设置
+            qrcodeImg.style.display = 'none';
+            qrcodeOverlay.style.display = 'none';
+            
+            // 如果有两种收款码，显示支付方式选择
+            if (hasWechatQR && hasAlipayQR) {
+                paymentMethods.style.display = 'flex';
+                
+                // 设置默认支付方式（微信）
+                currentPaymentMethod = 'wechat';
+                qrcodeImg.src = wechat;
+                qrcodeImg.style.display = 'block';
+                qrcodeOverlay.style.display = 'block';
+                
+                // 更新按钮状态
+                document.getElementById('paymentMethodWechat').classList.add('active');
+                document.getElementById('paymentMethodAlipay').classList.remove('active');
+                
+                console.log('✅ 已设置微信收款码:', wechat);
+                submitOrderBtn.disabled = false;
+                return true;
+            } 
+            // 如果只有微信收款码
+            else if (hasWechatQR) {
+                paymentMethods.style.display = 'none';
+                qrcodeImg.src = wechat;
+                qrcodeImg.style.display = 'block';
+                qrcodeOverlay.style.display = 'block';
+                console.log('✅ 已设置微信收款码（单一）:', wechat);
+                submitOrderBtn.disabled = false;
+                return true;
+            }
+            // 如果只有支付宝收款码
+            else if (hasAlipayQR) {
+                paymentMethods.style.display = 'none';
+                qrcodeImg.src = alipay;
+                qrcodeImg.style.display = 'block';
+                qrcodeOverlay.style.display = 'block';
+                console.log('✅ 已设置支付宝收款码（单一）:', alipay);
+                submitOrderBtn.disabled = false;
+                return true;
+            }
+        } else {
+            // 没有商家配置，显示错误信息
+            showQRCodeError("无法获取商家收款码", "商家收款码配置信息未找到，请稍后再试或联系商家");
+            submitOrderBtn.disabled = true;
+            return false;
+        }
+    }
+    
+    // ============================================
+    // 显示收款码错误信息（新增函数）
+    // ============================================
+    function showQRCodeError(title, message) {
+        const qrErrorContainer = document.getElementById('qrErrorContainer');
+        const qrcodeImg = document.getElementById('qrcodeImg');
+        const qrcodeOverlay = document.querySelector('.qrcode-overlay');
+        const paymentMethods = document.getElementById('paymentMethods');
+        
+        // 隐藏支付相关元素
+        if (qrcodeImg) qrcodeImg.style.display = 'none';
+        if (qrcodeOverlay) qrcodeOverlay.style.display = 'none';
+        if (paymentMethods) paymentMethods.style.display = 'none';
+        
+        // 显示错误信息
+        qrErrorContainer.innerHTML = `
+            <div class="qr-error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>${title}</h4>
+                <p>${message}</p>
+                <p style="font-size: 12px; margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> 请告知商家：登录商家后台，在"收款设置"中上传收款码
+                </p>
+            </div>
+        `;
+        qrErrorContainer.style.display = 'block';
+        
+        console.warn('⚠️ 收款码错误:', title, '-', message);
+    }
+    
+    // ============================================
+    // 支付方式切换（新增函数）
+    // ============================================
+    window.switchPaymentMethod = function(method) {
+        console.log('🔄 切换支付方式:', method);
+        
+        const wechatBtn = document.getElementById('paymentMethodWechat');
+        const alipayBtn = document.getElementById('paymentMethodAlipay');
+        const qrcodeImg = document.getElementById('qrcodeImg');
+        
+        if (!window.shopPaymentQR) {
+            console.warn('⚠️ 未获取到商家收款码配置');
+            return;
+        }
+        
+        currentPaymentMethod = method;
+        
+        // 更新按钮状态
+        if (method === 'wechat') {
+            wechatBtn.classList.add('active');
+            alipayBtn.classList.remove('active');
+            
+            // 切换到微信收款码
+            if (window.shopPaymentQR.wechat && window.shopPaymentQR.wechat.trim() !== '') {
+                qrcodeImg.src = window.shopPaymentQR.wechat;
+                console.log('✅ 已切换到微信收款码');
+            } else {
+                console.warn('⚠️ 商家未配置微信收款码');
+                showQRCodeError("微信收款码未配置", "商家尚未上传微信收款码，请选择其他支付方式或联系商家");
+            }
+        } else if (method === 'alipay') {
+            wechatBtn.classList.remove('active');
+            alipayBtn.classList.add('active');
+            
+            // 切换到支付宝收款码
+            if (window.shopPaymentQR.alipay && window.shopPaymentQR.alipay.trim() !== '') {
+                qrcodeImg.src = window.shopPaymentQR.alipay;
+                console.log('✅ 已切换到支付宝收款码');
+            } else {
+                console.warn('⚠️ 商家未配置支付宝收款码');
+                showQRCodeError("支付宝收款码未配置", "商家尚未上传支付宝收款码，请选择其他支付方式或联系商家");
+            }
+        }
+    }
+    
+    // ============================================
+// 页面导航函数
+// ============================================
+window.goToCheckout = function() {
+    if (window._cart.length === 0) {
+        alert('请先选择菜品');
+        return;
+    }
+    
+    // 🔥 检查是否有商家收款码配置
+    if (window.shopPaymentQR) {
+        const { wechat, alipay } = window.shopPaymentQR;
+        const hasWechatQR = wechat && wechat.trim() !== '';
+        const hasAlipayQR = alipay && alipay.trim() !== '';
+        
+        if (!hasWechatQR && !hasAlipayQR) {
+            alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
+            return;
+        }
+    } else if (window.isCloudConnected) {
+        // 尝试重新获取收款码配置
+        fetchShopPaymentQR().then(() => {
+            if (window.shopPaymentQR) {
+                const { wechat, alipay } = window.shopPaymentQR;
+                const hasWechatQR = wechat && wechat.trim() !== '';
+                const hasAlipayQR = alipay && alipay.trim() !== '';
+                
+                if (!hasWechatQR && !hasAlipayQR) {
+                    alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
+                    return;
+                }
+            } else {
+                alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
+                return;
+            }
+            
+            // 继续执行结账流程
+            proceedToCheckout();
+        });
+        return;
+    }
+    
+    // 生成订单号
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    const second = String(now.getSeconds()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    window.currentOrderNumber = year + month + day + hour + minute + second + random;
+    
+    // 更新结账页面信息
+    document.getElementById('orderNumber').textContent = window.currentOrderNumber;
+    document.getElementById('orderTime').textContent = now.toLocaleString('zh-CN');
+    
+    // 更新订单菜品列表
+    const checkoutItems = document.getElementById('checkoutItems');
+    checkoutItems.innerHTML = window._cart.map(item => `
+        <div class="order-item">
+            <span>${item.name} × ${item.quantity}</span>
+            <span>¥${(item.price * item.quantity).toFixed(2)}</span>
+        </div>
+    `).join('');
+    
+    // 更新总金额
+    const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    document.getElementById('finalAmount').textContent = totalAmount.toFixed(2);
+    document.getElementById('qrcodeAmount').textContent = totalAmount.toFixed(2);
+    
+    // 🔥 更新二维码显示（检查收款码）
+    updateQRCodeDisplay();
+    
+    // 隐藏购物车弹窗
+    hideCartModal();
+    
+    // 切换到结账页面
+    switchPage('menuPage', 'checkoutPage');
+};
+    
+    // ============================================
+// 提交订单函数（多商家支持）
+// ============================================
+window.submitOrder = async function() {
+    console.log('📤 提交订单...');
+    
+    if (window._cart.length === 0) {
+        alert('订单中没有菜品');
+        return;
+    }
+    
+    // 🔥 再次检查是否有有效的收款码（但只检查，不阻止提交）
+    if (window.shopPaymentQR) {
+        const { wechat, alipay } = window.shopPaymentQR;
+        const hasWechatQR = wechat && wechat.trim() !== '';
+        const hasAlipayQR = alipay && alipay.trim() !== '';
+        
+        if (!hasWechatQR && !hasAlipayQR) {
+            if (!confirm('商家尚未配置收款码，订单提交后顾客无法支付。确定要继续提交吗？')) {
+                return;
+            }
+        }
+    }
+    
+    // 显示加载动画
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+    
+    const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const orderTime = new Date().toLocaleString('zh-CN');
+    const dishesString = window._cart.map(item => 
+        `${item.name} × ${item.quantity} = ¥${(item.price * item.quantity).toFixed(2)}`
+    ).join('; ');
+    
+    // 构建订单数据 - 添加tenant_id字段
+    const orderData = {
+        table: window.sequenceNumber,
+        dishes: dishesString,
+        status: '新订单',
+        timestamp: Date.now(),
+        order_number: window.currentOrderNumber,
+        total_amount: parseFloat(totalAmount.toFixed(2)),
+        order_time: orderTime,
+        tenant_id: window.currentShopId  // 🔥 多商家支持：添加商家ID
+    };
+    
+    console.log('订单数据:', orderData);
+    
+    // 保存订单号和时间戳
+    window.lastOrderTimestamp = orderData.timestamp;
+    
+    // 尝试提交到云端
+    if (window.isCloudConnected && window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('orders')
+                .insert([orderData])
+                .select();
+            
+            if (error) {
+                console.error('提交到Supabase失败:', error);
+                saveOrderLocally(orderData);
+            } else {
+                console.log('订单提交成功:', data[0]);
+                showSuccessPage();
+            }
+        } catch (error) {
+            console.error('提交异常:', error);
+            saveOrderLocally(orderData);
+        }
+    } else {
+        // 离线模式，保存到本地
+        saveOrderLocally(orderData);
+    }
+    
+    // 清空购物车
+    window._cart = [];
+    updateCartDisplay();
+    
+    // 隐藏加载动画
+    document.getElementById('loadingOverlay').classList.add('hidden');
+};
+    
+    // 保存订单到本地
+    function saveOrderLocally(orderData) {
+        try {
+            const localOrders = JSON.parse(localStorage.getItem('localOrders') || '[]');
+            localOrders.push({
+                ...orderData,
+                is_local: true,
+                saved_at: new Date().toISOString()
+            });
+            localStorage.setItem('localOrders', JSON.stringify(localOrders));
+            console.log('订单已保存到本地');
+        } catch (error) {
+            console.error('保存到本地失败:', error);
+        }
+        
+        showSuccessPage();
+    }
+    
+    // ============================================
+    // 显示成功页面（修改）
+    // ============================================
+    function showSuccessPage() {
+        // 设置初始预计取餐时间（当前时间+10分钟）
+        const now = new Date();
+        const pickupTime = new Date(now.getTime() + 10 * 60000);
+        document.getElementById('pickupTime').textContent = 
+            pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+            pickupTime.getMinutes().toString().padStart(2, '0');
+        
+        // 设置初始状态
+        document.getElementById('orderStatus').textContent = '等待接单';
+        document.getElementById('queueAhead').textContent = '2单';
+        document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+        
+        // 切换到成功页面
+        switchPage('checkoutPage', 'successPage');
+        
+        // 启动自动刷新
+        setTimeout(() => {
+            startAutoRefresh();
+        }, 1000);
+    }
+    
+    // ============================================
+    // 新增订单时重置
+    // ============================================
+    window.newOrder = function() {
+        // 停止自动刷新
+        if (window.orderStatusInterval) {
+            clearInterval(window.orderStatusInterval);
+            window.orderStatusInterval = null;
+        }
+        
+        // 清除本地存储的订单数据（避免混淆）
+        localStorage.removeItem('last_order_number');
+        localStorage.removeItem('last_order_data');
+        
+        // 生成新的顺序号
+        generateSequenceNumber();
+        
+        // 清空购物车
+        window._cart = [];
+        updateCartDisplay();
+        
+        // 重新加载推荐菜品（确保获取最新的）
+        setTimeout(async () => {
+            await loadRecommendations();
+        }, 500);
+        
+        // 切换到顺序号页面
+        switchPage('successPage', 'sequencePage');
+    };
+    
+    // ============================================
+    // 工具函数
+    // ============================================
+    function switchPage(fromPage, toPage) {
+        document.getElementById(fromPage).classList.add('hidden');
+        document.getElementById(toPage).classList.remove('hidden');
+    }
+    
+    // 模拟等待信息更新
+    function updateWaitingInfo() {
+        const waitingOrders = Math.floor(Math.random() * 5) + 1;
+        const waitingMinutes = waitingOrders * 3 + Math.floor(Math.random() * 5);
+        
+        document.getElementById('waitingCount').textContent = `约${waitingOrders}单`;
+        document.getElementById('waitingTime').textContent = `${waitingMinutes}分钟`;
+        if (document.getElementById('queueAhead')) {
+            document.getElementById('queueAhead').textContent = `${waitingOrders}单`;
+        }
+    }
+    
+    // 显示提示消息
+    function showToast(message, type = 'success') {
+        // 移除已有的toast
+        document.querySelectorAll('.toast-message').forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#ff9800' : '#f44336'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+        
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle';
+        toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // ============================================
+    // 更新主题函数（多商家支持）
+    // ============================================
+    function updateThemeForShop(shopConfig) {
+        if (!shopConfig) return;
+        
+        // 更新CSS变量
+        if (shopConfig.themeColor) {
+            document.documentElement.style.setProperty('--primary-color', shopConfig.themeColor);
+        }
+        
+        // 更新页面标题
+        document.title = `${shopConfig.name} - 扫码点餐`;
+        
+        // 更新Logo（如果商家有单独的Logo）
+        if (shopConfig.logo) {
+            const logoImg = document.querySelector('.logo-image');
+            if (logoImg) {
+                logoImg.src = shopConfig.logo;
+                logoImg.alt = shopConfig.name;
+            }
+        }
+        
+        // 更新店铺名称显示
+        const welcomeTitle = document.querySelector('.logo-container h1');
+        if (welcomeTitle) {
+            welcomeTitle.textContent = `欢迎光临 ${shopConfig.name}`;
+        }
+    }
+    
+    // ============================================
+    // 获取当前商家ID（新增函数）
+    // ============================================
+    function getCurrentShopId() {
+        // 从URL参数获取商家ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const shopId = urlParams.get('shop');
+        
+        if (shopId) {
+            return shopId;
+        }
+        
+        // 从localStorage获取默认商家
+        const registeredShops = JSON.parse(localStorage.getItem('registered_shops') || '{}');
+        const shopIds = Object.keys(registeredShops);
+        
+        if (shopIds.length > 0) {
+            return shopIds[0];
+        }
+        
+        // 如果没有商家ID，使用默认
+        console.warn('⚠️ 未找到商家ID，使用默认');
+        return 'default';
+    }
+    
+    // ============================================
+    // 获取当前商家配置（新增函数）
+    // ============================================
+    function getCurrentShopConfig() {
+        const shopId = window.currentShopId || getCurrentShopId();
+        
+        // 从localStorage获取商家配置
+        const shopConfigStr = localStorage.getItem('shop_config_' + shopId);
+        if (shopConfigStr) {
+            try {
+                const config = JSON.parse(shopConfigStr);
+                if (config[shopId]) {
+                    console.log('✅ 从localStorage加载商家配置:', config[shopId].name);
+                    return config[shopId];
+                }
+            } catch (error) {
+                console.error('❌ 解析商家配置失败:', error);
+            }
+        }
+        
+        // 如果localStorage没有，尝试从全局配置获取
+        if (window.shopConfigs && window.shopConfigs[shopId]) {
+            console.log('✅ 从全局配置加载商家配置:', window.shopConfigs[shopId].name);
+            return window.shopConfigs[shopId];
+        }
+        
+        // 使用默认配置
+        console.log('📝 使用默认商家配置');
+        return {
+            name: '我的摊位',
+            themeColor: '#E63946',
+            logo: 'images/logo.png',
+            qrcode: 'images/qrcode.jpg',
+            dishes: [
+                { id: 1, name: '招牌炸酱面', price: 15, category: '主食', emoji: '🍜' },
+                { id: 2, name: '麻辣烫套餐', price: 18, category: '主食', emoji: '🥘' },
+                { id: 3, name: '香酥鸡排', price: 12, category: '小吃', emoji: '🍗' },
+                { id: 4, name: '冰镇酸梅汤', price: 5, category: '饮料', emoji: '🥤' }
+            ]
+        };
+    }
+    </script>
+</body>
+</html>

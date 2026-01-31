@@ -1,0 +1,540 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫码点餐 - 商家列表</title>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin: 30px 0 40px;
+            color: white;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header h1 i {
+            background: white;
+            color: #667eea;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        
+        /* 商家列表样式 */
+        .shop-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .shop-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border-color: #667eea;
+        }
+        
+        .shop-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .shop-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shop-name i {
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .shop-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        /* 标签样式 */
+        .shop-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .tag {
+            background: #f0f5ff;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* 按钮区域 */
+        .shop-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-customer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-customer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-admin {
+            background: #f0f5ff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-admin:hover {
+            background: #e6eeff;
+            transform: translateY(-2px);
+        }
+        
+        /* 添加商家卡片 */
+        .add-shop-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px dashed #ccc;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .add-shop-icon {
+            width: 60px;
+            height: 60px;
+            background: #f0f5ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 24px;
+            color: #667eea;
+        }
+        
+        .add-shop-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .add-shop-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .add-shop-steps {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .add-shop-steps h4 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-shop-steps ol {
+            padding-left: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .add-shop-steps li {
+            margin-bottom: 8px;
+        }
+        
+        .btn-add {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-add:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            .shop-actions {
+                flex-direction: column;
+            }
+            
+            .shop-card {
+                padding: 20px;
+            }
+            
+            .shop-name {
+                font-size: 20px;
+            }
+        }
+        
+        /* 底部说明 */
+        .footer {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .footer h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .footer p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .footer-tips {
+            font-size: 12px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <i class="fas fa-store"></i>
+            扫码点餐系统 - 商家门户
+        </h1>
+        <p>为每个商家提供独立的点餐和后台管理服务</p>
+    </div>
+    
+    <div class="container">
+        <div class="shop-list">
+            <!-- 默认商家 -->
+            <div class="shop-card">
+                <div class="shop-name">
+                    <i class="fas fa-utensils"></i>
+                    我的摊位（演示商家）
+                </div>
+                <div class="shop-desc">
+                    这是一个演示商家，用于展示系统基本功能。您可以通过此商家了解扫码点餐的全流程。
+                </div>
+                <div class="shop-tags">
+                    <span class="tag">默认商家</span>
+                    <span class="tag">演示用</span>
+                    <span class="tag">基础功能</span>
+                </div>
+                <div class="shop-actions">
+                    <a href="index.html?shop=default_shop" class="btn btn-customer">
+                        <i class="fas fa-qrcode"></i> 顾客点餐入口
+                    </a>
+                    <a href="admin.html?shop=default_shop" class="btn btn-admin">
+                        <i class="fas fa-chart-line"></i> 商家后台管理
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 老王煎饼 -->
+            <div class="shop-card">
+                <div class="shop-name">
+                    <i class="fas fa-pizza-slice"></i>
+                    老王煎饼
+                </div>
+                <div class="shop-desc">
+                    特色煎饼果子、豆浆油条等传统早餐。主打产品：经典煎饼果子、豪华煎饼套餐。
+                </div>
+                <div class="shop-tags">
+                    <span class="tag">早餐</span>
+                    <span class="tag">煎饼</span>
+                    <span class="tag">传统小吃</span>
+                </div>
+                <div class="shop-actions">
+                    <a href="index.html?shop=老王煎饼" class="btn btn-customer">
+                        <i class="fas fa-qrcode"></i> 顾客点餐入口
+                    </a>
+                    <a href="admin.html?shop=老王煎饼" class="btn btn-admin">
+                        <i class="fas fa-chart-line"></i> 商家后台管理
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 小李烧烤 -->
+            <div class="shop-card">
+                <div class="shop-name">
+                    <i class="fas fa-fire"></i>
+                    小李烧烤
+                </div>
+                <div class="shop-desc">
+                    夜市烧烤专家，提供各类烤串、啤酒。特色产品：羊肉串、烤鸡翅、烤玉米。
+                </div>
+                <div class="shop-tags">
+                    <span class="tag">烧烤</span>
+                    <span class="tag">夜宵</span>
+                    <span class="tag">啤酒</span>
+                </div>
+                <div class="shop-actions">
+                    <a href="index.html?shop=小李烧烤" class="btn btn-customer">
+                        <i class="fas fa-qrcode"></i> 顾客点餐入口
+                    </a>
+                    <a href="admin.html?shop=小李烧烤" class="btn btn-admin">
+                        <i class="fas fa-chart-line"></i> 商家后台管理
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加新商家说明 -->
+        <div class="add-shop-card">
+            <div class="add-shop-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="add-shop-title">
+                想添加您的店铺？
+            </div>
+            <div class="add-shop-desc">
+                请联系系统管理员，我们将为您快速配置专属的点餐系统
+            </div>
+            
+            <div class="add-shop-steps">
+                <h4><i class="fas fa-list-ol"></i> 添加新商家步骤</h4>
+                <ol>
+                    <li>提供店铺名称、Logo图片、收款码图片</li>
+                    <li>提供菜品列表和价格</li>
+                    <li>选择主题颜色（可选）</li>
+                    <li>获取专属的店铺链接和二维码</li>
+                </ol>
+            </div>
+            
+            <button class="btn-add" onclick="showContactInfo()">
+                <i class="fas fa-envelope"></i> 联系管理员添加店铺
+            </button>
+        </div>
+    </div>
+    
+    <!-- 底部说明 -->
+    <div class="footer">
+        <h3><i class="fas fa-info-circle"></i> 系统使用说明</h3>
+        <p><strong>顾客端</strong>：顾客扫描二维码进入点餐页面，选择菜品，生成取餐号，扫码支付</p>
+        <p><strong>商家端</strong>：商家登录后台查看订单，更新订单状态，管理菜品和推荐</p>
+        <p class="footer-tips">提示：每个商家拥有独立的数据，互相看不到对方的订单信息</p>
+    </div>
+
+    <script>
+        // 显示联系信息
+        function showContactInfo() {
+            const contactInfo = `
+                <div style="
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    padding: 20px;
+                ">
+                    <div style="
+                        background: white;
+                        border-radius: 15px;
+                        padding: 30px;
+                        max-width: 500px;
+                        width: 100%;
+                        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    ">
+                        <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-user-tie" style="color: #667eea;"></i>
+                            联系管理员添加店铺
+                        </h2>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <h4 style="margin-bottom: 15px; color: #333;">需要提供的信息：</h4>
+                            <ul style="padding-left: 20px; color: #666;">
+                                <li style="margin-bottom: 10px;">
+                                    <strong>店铺名称</strong>：如"张姐麻辣烫"
+                                </li>
+                                <li style="margin-bottom: 10px;">
+                                    <strong>Logo图片</strong>：建议200×200像素，PNG格式
+                                </li>
+                                <li style="margin-bottom: 10px;">
+                                    <strong>收款码</strong>：微信/支付宝收款码图片
+                                </li>
+                                <li style="margin-bottom: 10px;">
+                                    <strong>菜品列表</strong>：菜品名称、价格、分类
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                            <h4 style="margin-bottom: 10px; color: #333;">联系管理员：</h4>
+                            <p style="color: #666; margin-bottom: 5px;">
+                                <i class="fas fa-envelope"></i> 邮箱：admin@example.com
+                            </p>
+                            <p style="color: #666; margin-bottom: 5px;">
+                                <i class="fas fa-phone"></i> 电话：138-0000-0000
+                            </p>
+                            <p style="color: #666;">
+                                <i class="fas fa-weixin"></i> 微信：请扫码添加
+                            </p>
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    background: #667eea;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 8px;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    cursor: pointer;
+                                ">
+                            关闭窗口
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', contactInfo);
+        }
+        
+        // 页面加载完成后的效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 卡片逐个出现的动画
+            const cards = document.querySelectorAll('.shop-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+            
+            console.log('✅ 商家门户页面加载完成');
+            console.log('🏪 现有商家：我的摊位、老王煎饼、小李烧烤');
+        });
+    </script>
+</body>
+</html>
