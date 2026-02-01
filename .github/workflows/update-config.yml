@@ -1,0 +1,115 @@
+name: Update Config
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number
+        required: true
+        type: number
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.issue.labels.*.name, 'config-update')
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Get issue content
+      id: issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          let issue;
+          if (context.eventName === 'workflow_dispatch') {
+            const result = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.inputs.issue_number || 0 }}
+            });
+            issue = result.data;
+          } else {
+            issue = context.payload.issue;
+          }
+          
+          const fs = require('fs');
+          fs.writeFileSync('issue.txt', issue.body);
+          
+          core.setOutput('number', issue.number);
+          return issue.number;
+    - name: Extract config
+      id: extract
+      run: |
+        python3 << 'PYEND'
+        import re, json
+        content = open('issue.txt').read()
+        m = re.search(r'```json\s*([\s\S]*?)\s*```', content)
+        if not m:
+          m = re.search(r'```\s*([\s\S]*?)\s*```', content)
+        if m:
+          js = m.group(1)
+        else:
+          s = content.find('{')
+          d = 0
+          for i in range(s, len(content)):
+            if content[i] == '{': d += 1
+            elif content[i] == '}':
+              d -= 1
+              if d == 0:
+                js = content[s:i+1]
+                break
+        cfg = json.loads(js)
+        sid = list(cfg.keys())[0]
+        open('new.json', 'w').write(json.dumps(cfg, ensure_ascii=False, indent=2))
+        open('sid.txt', 'w').write(sid)
+        print(f'Shop ID: {sid}')
+        PYEND
+        
+        echo "shop_id=$(cat sid.txt)" >> $GITHUB_OUTPUT
+    - name: Update config
+      run: |
+        node << 'JSEND'
+        const fs = require('fs');
+        const cfg = JSON.parse(fs.readFileSync('new.json', 'utf8'));
+        const sid = Object.keys(cfg)[0];
+        const sc = cfg[sid];
+        let txt = fs.readFileSync('config.js', 'utf8');
+        const ns = "'" + sid + "': " + JSON.stringify(sc, null, 4);
+        if (txt.includes("'" + sid + "':")) {
+          const re = new RegExp("'" + sid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'\\s*:\\s*\\{[\\s\\S]*?\\n\\s*\\}", 'm');
+          txt = txt.replace(re, ns);
+        } else {
+          const p = txt.lastIndexOf('};');
+          txt = txt.substring(0, p) + ',\n    ' + ns + '\n' + txt.substring(p);
+        }
+        fs.writeFileSync('config.js', txt);
+        console.log('Updated');
+        JSEND
+    - name: Commit
+      run: |
+        git config user.name Actions
+        git config user.email actions@github.com
+        git add config.js
+        git diff --staged --quiet || git commit -m "Update config" && git push
+    - name: Comment
+      if: success()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ steps.issue.outputs.number }},
+            body: 'Config updated: `${{ steps.extract.outputs.shop_id }}`'
+          });
+          await github.rest.issues.update({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ steps.issue.outputs.number }},
+            state: 'closed'
+          });
