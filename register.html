@@ -458,6 +458,111 @@
         .manual-config-steps li {
             margin-bottom: 8px;
         }
+        
+        /* 新增：GitHub Issue 提交状态样式 */
+        .github-issue-status {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .github-issue-status.success {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .github-issue-status.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        
+        .github-issue-status.processing {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .issue-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #2196F3;
+            text-decoration: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .issue-link:hover {
+            text-decoration: underline;
+        }
+        
+        .github-actions-area {
+            background: #f3f4f6;
+            border: 2px dashed #6e40c9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .github-actions-area h4 {
+            color: #6e40c9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .github-actions-area p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .github-instructions {
+            text-align: left;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 13px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .github-instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .github-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            text-align: left;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .config-json {
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -491,6 +596,19 @@
         <!-- 进度条 -->
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+        </div>
+        
+        <!-- GitHub Issue 提交状态显示 -->
+        <div id="githubIssueStatus" class="github-issue-status" style="display: none;">
+            <div id="issueStatusContent"></div>
+            <div id="issueLinkContainer" style="display: none;">
+                <a href="#" id="issueLink" class="issue-link" target="_blank">
+                    <i class="fab fa-github"></i> 查看GitHub Issue
+                </a>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    配置更新通常会在1-3分钟内自动完成，完成后会自动关闭此Issue
+                </div>
+            </div>
         </div>
         
         <!-- 表单内容 -->
@@ -793,7 +911,47 @@
                 </div>
             </div>
             
-            <!-- 新增：配置文件下载区域 -->
+            <!-- 新增：GitHub Actions 自动化区域 -->
+            <div class="github-actions-area" id="githubAutoUpdateArea" style="display: none;">
+                <h4><i class="fab fa-github"></i> GitHub 自动化配置更新</h4>
+                <p>系统将自动提交配置更新到GitHub仓库，GitHub Actions会自动更新config.js文件。</p>
+                
+                <div class="github-instructions">
+                    <p><strong>自动化更新流程：</strong></p>
+                    <ol>
+                        <li>点击下方按钮生成GitHub Issue链接</li>
+                        <li>在新打开的页面中点击"Submit new issue"按钮</li>
+                        <li>GitHub Actions会自动检测到新Issue</li>
+                        <li>Actions工作流会自动更新config.js文件</li>
+                        <li>更新完成后会自动关闭Issue</li>
+                    </ol>
+                </div>
+                
+                <div id="autoUpdateStatus" style="text-align: left; margin: 15px 0;">
+                    <div id="githubUpdateContent" style="display: none;">
+                        <p><strong>要添加的配置：</strong></p>
+                        <div id="configJsonDisplay" class="config-json"></div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="createGitHubIssue()" id="createIssueBtn" style="background: #2da44e;">
+                    <i class="fab fa-github"></i> 创建GitHub Issue自动更新
+                </button>
+                <button class="btn" onclick="downloadUpdatedConfig()" style="background: #ff9800; margin-left: 10px;">
+                    <i class="fas fa-download"></i> 手动下载配置文件
+                </button>
+                
+                <div id="issueLinkContainer" style="margin-top: 20px; display: none;">
+                    <a href="#" id="issueLink" class="issue-link" target="_blank" style="font-size: 16px; padding: 10px 20px; background: #f6f8fa; border-radius: 6px; display: inline-flex; align-items: center; gap: 10px;">
+                        <i class="fab fa-github"></i> 点击这里去GitHub创建Issue
+                    </a>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> 在新页面中点击"Submit new issue"按钮，然后GitHub Actions会自动更新配置文件
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 原有配置文件下载区域 -->
             <div class="config-download-area" id="configDownloadArea" style="display: none;">
                 <h4><i class="fas fa-file-download"></i> 配置文件已生成</h4>
                 <p>请下载更新后的配置文件并替换项目中的 config.js 文件，这样新注册的商家才能正常访问。</p>
@@ -827,10 +985,19 @@
 
     <!-- 引入Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <!-- 引入GitHub图标 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/brands.min.js"></script>
     <!-- 引入Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
+        // ============================================
+        // GitHub 配置
+        // ============================================
+        const GITHUB_REPO = 'guocuicui1990/my-stall-order';
+        const GITHUB_OWNER = 'guocuicui1990';
+        const GITHUB_TOKEN = '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';
+        
         // ============================================
         // 全局变量和配置
         // ============================================
@@ -853,7 +1020,7 @@
         
         let supabaseClient = null;
         let generatedShopId = '';
-        let updatedConfigJS = null; // 存储更新后的配置文件
+        let updatedConfigJS = null;
         
         // ============================================
         // 初始化函数
@@ -1680,7 +1847,7 @@ FOR SELECT USING (true);
         }
         
         // ============================================
-        // 更新全局配置文件函数（修复后的核心逻辑）
+        // 更新全局配置文件函数
         // ============================================
         async function updateGlobalConfig() {
             console.log('📝 更新全局配置文件...');
@@ -1730,7 +1897,7 @@ FOR SELECT USING (true);
             }
         }
         
-        // 修复：生成完整的配置文件，包含所有已注册商家
+        // 生成完整的配置文件，包含所有已注册商家
         async function generateCompleteConfigJS(allShops) {
             console.log('🔧 生成完整的配置文件...');
             
@@ -2086,6 +2253,9 @@ console.log('✅ 商家配置加载完成');`;
             
             document.getElementById('finalPassword').textContent = shopConfig.password;
             
+            // 显示GitHub自动化区域
+            document.getElementById('githubAutoUpdateArea').style.display = 'block';
+            
             // 显示配置文件下载区域
             if (updatedConfigJS) {
                 document.getElementById('configDownloadArea').style.display = 'block';
@@ -2098,6 +2268,11 @@ console.log('✅ 商家配置加载完成');`;
             
             // 显示成功页面
             document.getElementById('successScreen').style.display = 'block';
+            
+            // 显示要添加的配置内容
+            const configUpdate = generateGitHubConfigUpdate();
+            document.getElementById('configJsonDisplay').textContent = JSON.stringify(configUpdate, null, 2);
+            document.getElementById('githubUpdateContent').style.display = 'block';
         }
         
         function updateLocalConfigBeforeNavigate() {
@@ -2137,6 +2312,183 @@ console.log('✅ 商家配置加载完成');`;
             
             console.log('✅ 商家配置已保存到localStorage，可以访问了');
         }
+        
+        // ============================================
+        // GitHub自动化函数
+        // ============================================
+        function generateGitHubConfigUpdate() {
+            // 获取收款码URL（优先微信，其次支付宝）
+            let qrcodeUrl = 'images/qrcode.jpg'; // 默认收款码
+            if (shopConfig.qrCodes?.wechat?.url) {
+                qrcodeUrl = shopConfig.qrCodes.wechat.url;
+            } else if (shopConfig.qrCodes?.alipay?.url) {
+                qrcodeUrl = shopConfig.qrCodes.alipay.url;
+            }
+            
+            // 生成要添加到config.js中的新商家配置
+            const newShopConfig = {
+                name: shopConfig.name,
+                themeColor: shopConfig.themeColor,
+                logo: 'images/logo.png',
+                qrcode: qrcodeUrl,
+                dishes: shopConfig.dishes.map((dish, index) => ({
+                    id: index + 1,
+                    name: dish.name,
+                    price: dish.price,
+                    emoji: dish.emoji || '🍽️',
+                    category: dish.category || '未分类',
+                    tags: dish.tags || []
+                }))
+            };
+            
+            return {
+                [generatedShopId]: newShopConfig
+            };
+        }
+        
+        function createGitHubIssue() {
+    console.log('📤 创建GitHub Issue...');
+    
+    // 更新按钮状态
+    const createBtn = document.getElementById('createIssueBtn');
+    createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在生成...';
+    createBtn.disabled = false; // 确保按钮可用
+    
+    // 生成配置数据
+    const configUpdate = generateGitHubConfigUpdate();
+    
+    // 创建Issue标题和内容
+    const issueTitle = `[商家注册] ${shopConfig.name} - ${generatedShopId}`;
+    
+    const issueBody = `# 🏪 商家注册配置更新
+
+**商家名称：** ${shopConfig.name}
+**商家ID：** ${generatedShopId}
+**联系人：** ${shopConfig.contact.name}
+**电话：** ${shopConfig.contact.phone}
+**注册时间：** ${new Date().toLocaleString()}
+
+## 🔧 配置更新内容
+
+请将以下配置添加到 \`config.js\` 文件的 \`window.shopConfigs\` 对象中：
+
+\`\`\`json
+${JSON.stringify(configUpdate, null, 2)}
+\`\`\`
+
+## 🤖 自动化处理说明
+
+此Issue由商家自助注册系统自动创建。
+
+**标签：** config-update, auto-merge
+**状态：** 待处理
+
+## 📋 系统信息
+- 菜品数量: ${shopConfig.dishes.length} 个
+- 主题颜色: ${shopConfig.themeColor}
+- 收款方式: ${shopConfig.qrCodes?.wechat ? '微信' : ''}${shopConfig.qrCodes?.alipay ? '支付宝' : ''}
+- 监控状态: ${shopConfig.enableMonitoring ? '已启用' : '未启用'}
+
+---
+
+### 访问链接
+- 顾客点餐: index.html?shop=${generatedShopId}
+- 后台管理: admin.html?shop=${generatedShopId}
+
+---
+
+*GitHub Actions会自动检测到此Issue并更新config.js文件，更新完成后会自动关闭此Issue。*`;
+    
+    // 创建GitHub Issue链接
+    const labels = 'config-update,auto-merge';
+    const issueUrl = `https://github.com/${GITHUB_REPO}/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}&labels=${labels}`;
+    
+    // 显示链接
+    const issueLink = document.getElementById('issueLink');
+    issueLink.href = issueUrl;
+    
+    document.getElementById('issueLinkContainer').style.display = 'block';
+    
+    // 立即自动打开新窗口
+    setTimeout(() => {
+        console.log('🌐 正在打开GitHub Issue页面...');
+        const newWindow = window.open(issueUrl, '_blank');
+        
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            // 如果浏览器阻止了弹出窗口，显示提示
+            console.log('⚠️ 浏览器阻止了弹出窗口');
+            
+            // 更新按钮状态
+            createBtn.innerHTML = '<i class="fab fa-github"></i> 点击手动打开';
+            createBtn.style.background = '#ff9800';
+            
+            // 显示提示信息
+            document.getElementById('autoUpdateStatus').innerHTML += `
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ff9800;">
+                    <p><i class="fas fa-exclamation-triangle"></i> <strong>浏览器阻止了自动弹出窗口</strong></p>
+                    <p>请手动点击上面的链接打开GitHub Issue页面。</p>
+                    <p>或者点击这里：<a href="${issueUrl}" target="_blank" style="color: #2196F3;">${issueUrl}</a></p>
+                </div>
+            `;
+        } else {
+            // 成功打开窗口
+            console.log('✅ 已打开GitHub Issue页面');
+            createBtn.innerHTML = '<i class="fas fa-check"></i> 已打开GitHub';
+            createBtn.style.background = '#4CAF50';
+            
+            // 显示成功消息
+            document.getElementById('autoUpdateStatus').innerHTML += `
+                <div style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #4CAF50;">
+                    <p><i class="fas fa-check-circle"></i> <strong>GitHub Issue页面已在新标签页中打开</strong></p>
+                    <p>请在新页面中点击"Submit new issue"按钮。</p>
+                </div>
+            `;
+        }
+    }, 500); // 延迟500ms，确保DOM更新完成
+    
+    // 显示成功消息
+    const statusDiv = document.getElementById('githubIssueStatus');
+    statusDiv.className = 'github-issue-status success';
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = `
+        <p><i class="fas fa-check-circle"></i> <strong>GitHub Issue链接已生成！</strong></p>
+        <p>正在尝试打开GitHub Issue创建页面...</p>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+            <i class="fas fa-info-circle"></i> 如果页面没有自动打开，请手动点击上面的链接。
+        </p>
+    `;
+    
+    // 添加复制链接功能
+    const copyLinkBtn = document.createElement('button');
+    copyLinkBtn.innerHTML = '<i class="fas fa-copy"></i> 复制链接';
+    copyLinkBtn.style.cssText = `
+        padding: 8px 15px;
+        background: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 14px;
+    `;
+    copyLinkBtn.onclick = function() {
+        navigator.clipboard.writeText(issueUrl).then(function() {
+            alert('GitHub Issue链接已复制到剪贴板！');
+        }, function(err) {
+            console.error('复制失败: ', err);
+            // 备用方法
+            const tempInput = document.createElement('input');
+            tempInput.value = issueUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('链接已复制到剪贴板！');
+        });
+    };
+    
+    statusDiv.appendChild(copyLinkBtn);
+}
         
         // ============================================
         // 工具函数
@@ -2400,6 +2752,160 @@ console.log('✅ 商家配置加载完成');`;
         function printQRCode() {
             window.print();
         }
+
+// ============================================
+// 浏览器弹窗处理帮助函数
+// ============================================
+function openGitHubLinkManually() {
+    console.log('🔄 尝试手动打开GitHub链接...');
+    
+    // 获取配置数据
+    const configUpdate = generateGitHubConfigUpdate();
+    
+    // 创建Issue标题和内容
+    const issueTitle = `[商家注册] ${shopConfig.name} - ${generatedShopId}`;
+    const issueBody = `# 🏪 商家注册配置更新\n\n**商家名称：** ${shopConfig.name}\n**商家ID：** ${generatedShopId}\n**联系人：** ${shopConfig.contact.name}\n**电话：** ${shopConfig.contact.phone}\n\n## 配置更新内容\n\n请将以下配置添加到config.js文件的window.shopConfigs对象中：\n\n\`\`\`json\n${JSON.stringify(configUpdate, null, 2)}\n\`\`\`\n\n## 自动处理说明\n\n此Issue由商家自助注册系统自动创建，GitHub Actions会自动处理此配置更新。\n\n**标签：** config-update, auto-merge\n**状态：** 待处理`;
+    const labels = 'config-update,auto-merge';
+    const issueUrl = `https://github.com/${GITHUB_REPO}/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}&labels=${labels}`;
+    
+    console.log('🔗 GitHub Issue URL:', issueUrl);
+    
+    // 尝试打开新窗口
+    const newWindow = window.open(issueUrl, '_blank', 'noopener,noreferrer');
+    
+    // 检查是否被阻止
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        console.log('⚠️ 浏览器阻止了弹出窗口，显示手动操作界面');
+        
+        // 显示手动操作界面
+        showManualLinkInterface(issueUrl);
+        
+        return false;
+    }
+    
+    return true;
+}
+
+function showManualLinkInterface(issueUrl) {
+    // 移除可能已存在的提示
+    const existingTip = document.getElementById('manualLinkTip');
+    if (existingTip) {
+        existingTip.remove();
+    }
+    
+    // 创建提示区域
+    const tipDiv = document.createElement('div');
+    tipDiv.id = 'manualLinkTip';
+    tipDiv.style.cssText = `
+        margin-top: 15px;
+        padding: 15px;
+        background: #fff3cd;
+        border-radius: 8px;
+        border-left: 4px solid #ff9800;
+        text-align: left;
+    `;
+    
+    tipDiv.innerHTML = `
+        <p style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i>
+            <strong>浏览器阻止了自动弹出窗口</strong>
+        </p>
+        <p style="margin-bottom: 10px; font-size: 14px;">
+            请按以下步骤操作：
+        </p>
+        <ol style="margin-left: 20px; margin-bottom: 10px; font-size: 14px;">
+            <li>复制下面的链接</li>
+            <li>在新标签页中打开</li>
+            <li>点击"Submit new issue"按钮</li>
+        </ol>
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+            <input type="text" id="manualLinkInput" value="${issueUrl}" readonly 
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            <button onclick="copyManualLink()" style="padding: 10px 15px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-copy"></i> 复制
+            </button>
+        </div>
+        <div style="margin-top: 10px;">
+            <a href="${issueUrl}" target="_blank" style="color: #2196F3; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-external-link-alt"></i> 直接点击这里打开（也可能被阻止）
+            </a>
+        </div>
+    `;
+    
+    // 添加到页面
+    const autoUpdateStatus = document.getElementById('autoUpdateStatus');
+    if (autoUpdateStatus) {
+        autoUpdateStatus.appendChild(tipDiv);
+    }
+}
+
+function copyManualLink() {
+    const input = document.getElementById('manualLinkInput');
+    if (!input) return;
+    
+    input.select();
+    input.setSelectionRange(0, 99999); // 对于移动设备
+    
+    try {
+        navigator.clipboard.writeText(input.value).then(function() {
+            showCopySuccess();
+        }).catch(function(err) {
+            // 如果clipboard API失败，使用document.execCommand
+            document.execCommand('copy');
+            showCopySuccess();
+        });
+    } catch (err) {
+        // 备用方法
+        document.execCommand('copy');
+        showCopySuccess();
+    }
+}
+
+function showCopySuccess() {
+    // 显示成功消息
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    successMsg.innerHTML = '<i class="fas fa-check-circle"></i> 链接已复制到剪贴板！';
+    document.body.appendChild(successMsg);
+    
+    // 3秒后移除
+    setTimeout(() => {
+        successMsg.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (successMsg.parentNode) {
+                successMsg.parentNode.removeChild(successMsg);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// 添加CSS动画
+if (!document.querySelector('#manualLinkStyles')) {
+    const style = document.createElement('style');
+    style.id = 'manualLinkStyles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
         
         function startNewRegistration() {
             // 重置页面状态
@@ -2503,6 +3009,9 @@ console.log('✅ 商家配置加载完成');`;
             document.querySelector('.register-stepper').style.display = 'flex';
             document.querySelector('.progress-bar').style.display = 'block';
             document.getElementById('successScreen').style.display = 'none';
+            document.getElementById('githubAutoUpdateArea').style.display = 'none';
+            document.getElementById('configDownloadArea').style.display = 'none';
+            document.getElementById('githubIssueStatus').style.display = 'none';
             
             // 激活第一步
             document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
