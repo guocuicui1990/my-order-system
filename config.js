@@ -265,8 +265,8 @@ window.shopConfigs = {
             }
         ]
     },
-    "z_ml11lsuyn4sd": {
-        "name": "张家凉皮",
+    "sha_ml7n1l4gie88": {
+        "name": "老姜家烧烤",
         "themeColor": "#e63946",
         "logo": "images/logo.png",
         "qrcode": "images/qrcode.jpg",
