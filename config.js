@@ -289,8 +289,8 @@ window.shopConfigs = {
             }
         ]
     },
-    "l_ml12iun7zzo6": {
-        "name": "老马泡沫",
+    "lwa_ml7na7uwjecc": {
+        "name": "l老王煎饼",
         "themeColor": "#e63946",
         "logo": "images/logo.png",
         "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/l_ml12iun7zzo6_wechat_qrcode_1769788744103.png",
