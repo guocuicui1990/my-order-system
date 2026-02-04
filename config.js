@@ -241,8 +241,8 @@ window.shopConfigs = {
             }
         ]
     },
-    "li_ml11igrnvvmn": {
-        "name": "李家辣条",
+    "sha_ml7n76i8gkwf": {
+        "name": "梁家烧烤",
         "themeColor": "#376ce6",
         "logo": "images/logo.png",
         "qrcode": "images/qrcode.jpg",
