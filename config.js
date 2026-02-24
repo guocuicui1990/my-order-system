@@ -315,8 +315,8 @@ function autoMergeRegisteredShops() {
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
                     ,
-    'bin_mm0baibo8wb4': {
-    "name": "巍峨嗡嗡",
+    'default_shop': {
+    "name": "我的摊位",
     "themeColor": "#e63946",
     "logo": "images/logo.png",
     "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/bin_mm0baibo8wb4_wechat_qrcode_1771919787602.png",
