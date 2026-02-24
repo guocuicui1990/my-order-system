@@ -314,7 +314,32 @@ function autoMergeRegisteredShops() {
                         logo: 'images/logo.png',
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
-                    };
+                    ,
+    'bin_mm0baibo8wb4': {
+    "name": "巍峨嗡嗡",
+    "themeColor": "#e63946",
+    "logo": "images/logo.png",
+    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/bin_mm0baibo8wb4_wechat_qrcode_1771919787602.png",
+    "dishes": [
+        {
+            "id": 1,
+            "name": "招牌炸酱面",
+            "price": 15,
+            "emoji": "🍜",
+            "category": "主食",
+            "tags": []
+        },
+        {
+            "id": 2,
+            "name": "麻辣烫套餐",
+            "price": 18,
+            "emoji": "🥘",
+            "category": "主食",
+            "tags": []
+        }
+    ]
+}
+};
                 }
                 
                 console.log(`✅ 自动添加商家配置: ${shopData.name} (${shopId})`);
