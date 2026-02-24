@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -1062,9 +1062,9 @@
                         return;
                     }
                     
-                    // 3. 没有数据
-                    console.log('📝 没有商家数据');
-                    shops = [];
+                    // 3. 使用模拟数据
+                    console.log('📝 使用模拟商家数据');
+                    shops = getMockShops();
                     
                 } else if (supabaseShops && supabaseShops.length > 0) {
                     console.log('✅ 从Supabase加载商家:', supabaseShops.length);
@@ -1086,17 +1086,14 @@
                 // 更新系统统计
                 updateSystemStats();
                 
-                // 如果有商家，默认选择第一个商家
+                // 默认选择第一个商家
                 if (shops.length > 0 && !currentShopId) {
                     selectShop(shops[0].tenant_id || shops[0].id);
-                } else if (shops.length === 0) {
-                     // 没有商家时隐藏服务时间管理面板
-                    document.getElementById('serviceTimeManagement').style.display = 'none';
                 }
                 
             } catch (error) {
                 console.error('❌ 加载商家列表失败:', error);
-                shops = [];
+                shops = getMockShops();
                 renderShopsList();
                 updateSystemStats();
             }
@@ -2067,6 +2064,43 @@
         // ============================================
         // 工具函数
         // ============================================
+        function getMockShops() {
+            return [
+                {
+                    id: 'default_shop',
+                    tenant_id: 'default_shop',
+                    name: '我的摊位',
+                    shop_type: 'food',
+                    theme_color: '#E63946',
+                    is_active: true,
+                    service_start_time: new Date().toISOString(),
+                    service_end_time: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30天后
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: 'laowang',
+                    tenant_id: '老王煎饼',
+                    name: '老王煎饼',
+                    shop_type: 'food',
+                    theme_color: '#FF6B35',
+                    is_active: true,
+                    service_start_time: null,
+                    service_end_time: null,
+                    created_at: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    id: 'xiaoli',
+                    tenant_id: '小李烧烤',
+                    name: '小李烧烤',
+                    shop_type: 'food',
+                    theme_color: '#FF9A00',
+                    is_active: true,
+                    service_start_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天前开始
+                    service_end_time: new Date(Date.now() + 23 * 24 * 60 * 60 * 1000).toISOString(), // 23天后结束
+                    created_at: new Date(Date.now() - 172800000).toISOString()
+                }
+            ];
+        }
         
         function getAlertIcon(type) {
             switch (type) {
