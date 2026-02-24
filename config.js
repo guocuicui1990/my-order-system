@@ -339,6 +339,31 @@ function autoMergeRegisteredShops() {
         }
     ]
 }
+,
+    'm_mm0d62gztj7x': {
+    "name": "苗家面馆（演示）",
+    "themeColor": "#e63946",
+    "logo": "images/logo.png",
+    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/m_mm0d62gztj7x_wechat_qrcode_1771922939655.png",
+    "dishes": [
+        {
+            "id": 1,
+            "name": "招牌炸酱面",
+            "price": 15,
+            "emoji": "🍜",
+            "category": "主食",
+            "tags": []
+        },
+        {
+            "id": 2,
+            "name": "麻辣烫套餐",
+            "price": 18,
+            "emoji": "🥘",
+            "category": "主食",
+            "tags": []
+        }
+    ]
+}
 };
                 }
                 
