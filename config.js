@@ -338,32 +338,7 @@ function autoMergeRegisteredShops() {
                         logo: 'images/logo.png',
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
-                    ,
-    'l_mm1enoye6g13': {
-    "name": "老罗凉皮",
-    "themeColor": "#e63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/l_mm1enoye6g13_wechat_qrcode_1771985907736.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
-};
+                    };
                 }
                 
                 console.log(`✅ 自动添加商家配置: ${shopData.name} (${shopId})`);
