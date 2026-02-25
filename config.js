@@ -260,6 +260,79 @@ window.shopConfigs = {
         }
     ]
 }
+,
+    "w_mm1tqxx014d9": {
+    "name": "旺仔烧烤",
+    "themeColor": "#e63946",
+    "logo": "images/logo.png",
+    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/w_mm1tqxx014d9_wechat_qrcode_1772011253559.png",
+    "dishes": [
+        {
+            "id": 1,
+            "name": "烤面筋",
+            "price": 2.5,
+            "emoji": "🍢",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 2,
+            "name": "烤鱼豆腐",
+            "price": 2.5,
+            "emoji": "🧀",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 3,
+            "name": "烤鱿鱼",
+            "price": 2.5,
+            "emoji": "🦑",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 4,
+            "name": "烤大肉串",
+            "price": 3.5,
+            "emoji": "🍖",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 5,
+            "name": "烤香肠（普通）",
+            "price": 2.5,
+            "emoji": "🌭",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 6,
+            "name": "烤香肠（纯肉）",
+            "price": 5,
+            "emoji": "🌭",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 7,
+            "name": "烤鸭肠",
+            "price": 10,
+            "emoji": "🍖",
+            "category": "小吃",
+            "tags": []
+        },
+        {
+            "id": 8,
+            "name": "烤年糕",
+            "price": 2.5,
+            "emoji": "🍜",
+            "category": "小吃",
+            "tags": []
+        }
+    ]
+}
 };
 
 // ============================================
