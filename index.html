@@ -1050,7 +1050,7 @@
             
             <div class="payment-area">
                 <div class="payment-title">扫码支付</div>
-                <div class="payment-tip">请提交订单后再扫描摊位前二维码进行支付</div>
+                <div class="payment-tip">请提交订单后再扫描摊位前二维码完成支付</div>
                 
                 <!-- 收款码错误提示 -->
                 <div id="qrErrorContainer" style="display: none;">
@@ -1250,8 +1250,8 @@
         // 9. 加载推荐菜品
         await loadRecommendations();
         
-        // 10. 更新等待信息
-        updateWaitingInfo();
+        // 10. 更新等待信息（修改为从云端获取真实数据）
+        await updateWaitingInfo();
         
         console.log('✅ 系统初始化完成');
     });
@@ -2230,20 +2230,52 @@
         document.getElementById(toPage).classList.remove('hidden');
     }
     
-    // 更新等待信息
-    function updateWaitingInfo() {
-        const waitingOrders = Math.floor(Math.random() * 5) + 1;
-        const waitingMinutes = waitingOrders * 3 + Math.floor(Math.random() * 5);
-        
-        document.getElementById('waitingCount').textContent = `约${waitingOrders}单`;
-        document.getElementById('waitingTime').textContent = `${waitingMinutes}分钟`;
+    // ============================================
+    // 更新等待信息（修改为从云端获取真实数据）
+    // ============================================
+    async function updateWaitingInfo() {
+        let waitingOrders = 0;
+        let waitingMinutes = 0;
+
+        if (window.supabaseClient && window.isCloudConnected && window.currentShopId) {
+            try {
+                // 查询当前商家的新订单和处理中订单数量
+                const { count, error } = await window.supabaseClient
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('tenant_id', window.currentShopId)
+                    .in('status', ['新订单', '处理中']);
+
+                if (error) {
+                    console.warn('获取等待订单数量失败:', error.message);
+                    // 降级为随机数
+                    waitingOrders = Math.floor(Math.random() * 5) + 1;
+                } else {
+                    waitingOrders = count || 0;
+                }
+            } catch (error) {
+                console.error('获取等待订单数量异常:', error);
+                waitingOrders = Math.floor(Math.random() * 5) + 1;
+            }
+        } else {
+            // 未连接云端，使用随机数
+            waitingOrders = Math.floor(Math.random() * 5) + 1;
+        }
+
+        // 估算等待时间，假设每单平均5分钟
+        waitingMinutes = waitingOrders * 5;
+
+        document.getElementById('waitingCount').textContent = waitingOrders > 0 ? `约${waitingOrders}单` : '暂无等待';
+        document.getElementById('waitingTime').textContent = waitingOrders > 0 ? `${waitingMinutes}分钟` : '--';
+
         if (document.getElementById('queueAhead')) {
-            document.getElementById('queueAhead').textContent = `${waitingOrders}单`;
+            document.getElementById('queueAhead').textContent = waitingOrders > 0 ? `${waitingOrders}单` : '0单';
         }
     }
     
     // 显示提示消息
-    function showToast(message, type = 'success') {
+    function showToast(message, type = 'info') {
+        // 移除已有的toast
         document.querySelectorAll('.toast-message').forEach(toast => toast.remove());
         
         const toast = document.createElement('div');
