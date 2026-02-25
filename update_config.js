@@ -23,7 +23,7 @@ try {
   console.log('商家名称:', shopConfig.name);
   console.log('菜品数量:', shopConfig.dishes?.length || 0);
 
-  // 读取现有config.js
+  // 读取现有 config.js
   let content = fs.readFileSync(configFile, 'utf8');
 
   // 准备新商家配置字符串（使用双引号，缩进4空格）
@@ -40,37 +40,63 @@ try {
   } else {
     console.log(`➕ 添加新商家: ${shopId}`);
 
-    // 定义标记（必须与 config.js 中的完全一致）
-    const startMarker = '// ---------- 商家配置开始标记 ----------';
-    const endMarker = '// ---------- 商家配置结束标记 ----------';
+    // 定位 window.shopConfigs = { 的位置
+    const objStart = content.indexOf('window.shopConfigs = {');
+    if (objStart === -1) throw new Error('未找到 window.shopConfigs 定义');
 
-    const startIdx = content.indexOf(startMarker);
-    const endIdx = content.indexOf(endMarker);
+    // 从 objStart 之后开始解析大括号，找到匹配的结束 }
+    let braceCount = 0;
+    let inString = false;
+    let escape = false;
+    let objEnd = -1;
 
-    if (startIdx === -1 || endIdx === -1) {
-      throw new Error('未找到配置标记，请确保config.js中包含开始和结束标记');
+    for (let i = objStart + 'window.shopConfigs = {'.length; i < content.length; i++) {
+      const char = content[i];
+      
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (char === '\\' && inString) {
+        escape = true;
+        continue;
+      }
+      if (char === '"' || char === "'") {
+        if (!inString) {
+          inString = char;
+        } else if (inString === char) {
+          inString = false;
+        }
+        continue;
+      }
+      if (!inString) {
+        if (char === '{') braceCount++;
+        else if (char === '}') {
+          if (braceCount === 0) {
+            objEnd = i; // 找到匹配的结束 }
+            break;
+          } else {
+            braceCount--;
+          }
+        }
+      }
     }
 
-    // 找到结束标记之前的最后一个换行符的位置
-    const lastNewLineBeforeEnd = content.lastIndexOf('\n', endIdx);
-    if (lastNewLineBeforeEnd === -1) {
-      throw new Error('无法定位结束标记前的换行');
-    }
+    if (objEnd === -1) throw new Error('无法找到 window.shopConfigs 对象的结束位置');
 
-    // 获取结束标记前一行的内容（即对象定义的最后一行）
-    const prevLineStart = content.lastIndexOf('\n', lastNewLineBeforeEnd - 1) + 1;
-    const prevLine = content.substring(prevLineStart, lastNewLineBeforeEnd).trim();
-
-    // 判断是否需要添加逗号
-    let needComma = true;
-    if (prevLine.endsWith(',') || prevLine.endsWith('{') || prevLine.endsWith('}') || prevLine.endsWith('};')) {
-      needComma = false; // 如果已经以逗号或大括号结尾，不加逗号
-    }
-
+    // 找到 objEnd 之前的非空白字符，判断是否需要逗号
+    let lastNonSpace = objEnd - 1;
+    while (lastNonSpace >= 0 && /\s/.test(content[lastNonSpace])) lastNonSpace--;
+    const lastChar = content[lastNonSpace];
+    
+    // 决定是否需要逗号
+    const needComma = lastChar !== ',' && lastChar !== '{' && lastChar !== '}' && lastChar !== ';';
+    
+    // 构造插入字符串
     const insertStr = needComma ? ',\n' + newShopConfigStr : '\n' + newShopConfigStr;
-
-    // 在结束标记前一行之后插入新内容
-    content = content.substring(0, lastNewLineBeforeEnd + 1) + insertStr + content.substring(lastNewLineBeforeEnd + 1);
+    
+    // 在 objEnd 之前插入（注意 objEnd 是 '}' 的位置）
+    content = content.substring(0, objEnd) + insertStr + '\n' + content.substring(objEnd);
   }
 
   // 保存更新
