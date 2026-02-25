@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>我的摊位 - 扫码点餐</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- 商家配置文件 -->
@@ -15,6 +15,57 @@
             --light-bg: #FFF5F5;
             --dark-text: #333333;
             --light-text: #666666;
+        }
+        
+        /* 全局样式修复 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* 防止body滚动 */
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        
+        /* 页面容器 */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: #f8f9fa;
+            padding-bottom: 0;
+        }
+        
+        /* 菜单页面特殊处理 - 需要为固定底部栏留出空间 */
+        #menuPage {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            padding-bottom: 0;
+        }
+        
+        /* 菜单页面的主要内容区域 */
+        .menu-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px; /* 为底部结算栏留出空间 */
         }
         
         .logo-container {
@@ -147,10 +198,8 @@
             align-items: center;
             padding: 15px;
             background: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
             border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
         
         .back-btn {
@@ -207,6 +256,7 @@
             background: white;
             gap: 8px;
             border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
         
         .category-tab {
@@ -231,7 +281,6 @@
             gap: 15px;
         }
         
-        /* 修复：将数量控制器移到菜品名称后面，避免底部结算栏遮挡 */
         .dish-card {
             background: white;
             border-radius: 12px;
@@ -240,7 +289,6 @@
             gap: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: transform 0.2s;
-            align-items: center; /* 垂直居中 */
         }
         
         .dish-card:hover {
@@ -262,44 +310,41 @@
         .dish-details {
             flex: 1;
             display: flex;
-            flex-wrap: wrap;        /* 允许换行 */
-            align-items: center;    /* 垂直居中 */
-            gap: 10px 15px;         /* 间距，适应小屏幕 */
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .dish-info-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
         }
         
         .dish-name {
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             color: var(--dark-text);
-            white-space: nowrap;    /* 防止名称换行 */
         }
         
         .dish-price {
             color: var(--primary-color);
             font-size: 16px;
             font-weight: 600;
-            margin-right: auto;      /* 将价格和后面的操作推开 */
-        }
-        
-        /* 新的布局：菜品信息区域，名称和价格可以并排 */
-        .dish-info-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            margin-right: 8px;
         }
         
         .dish-actions {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-left: auto;       /* 靠右对齐，但因为有价格在左侧，这里可保留 */
-            flex-shrink: 0;
+            margin-left: auto;
         }
         
         .quantity-btn {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border: 1px solid #e0e0e0;
             border-radius: 50%;
             background: white;
@@ -308,18 +353,27 @@
             justify-content: center;
             cursor: pointer;
             color: var(--light-text);
+            font-size: 14px;
         }
         
         .quantity-btn:active {
             transform: scale(0.95);
+            background: #f5f5f5;
+        }
+        
+        .quantity-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
         
         .dish-quantity {
             min-width: 30px;
             text-align: center;
             font-weight: 600;
+            font-size: 16px;
         }
         
+        /* 底部购物车栏 - 固定在底部 */
         .bottom-cart-bar {
             position: fixed;
             bottom: 0;
@@ -332,6 +386,8 @@
             z-index: 1000;
             max-width: 500px;
             margin: 0 auto;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
         
         .cart-summary {
@@ -753,7 +809,7 @@
             color: #333;
         }
         
-        /* 支付方式按钮样式（新增） */
+        /* 支付方式按钮样式 */
         .payment-methods {
             display: flex;
             gap: 10px;
@@ -792,17 +848,17 @@
         
         /* 微信支付按钮特殊样式 */
         .payment-method-btn:nth-child(1).active {
-            background: #07C160; /* 微信绿色 */
+            background: #07C160;
             border-color: #07C160;
         }
         
         /* 支付宝支付按钮特殊样式 */
         .payment-method-btn:nth-child(2).active {
-            background: #00A0E9; /* 支付宝蓝色 */
+            background: #00A0E9;
             border-color: #00A0E9;
         }
         
-        /* 新增：收款码错误提示样式 */
+        /* 收款码错误提示样式 */
         .qr-error-message {
             text-align: center;
             padding: 30px 20px;
@@ -836,13 +892,13 @@
     <div id="sequencePage" class="page">
         <div class="logo-container">
             <div class="logo-icon">
-                <img src="images/logo.png" alt="我的摊位" class="logo-image">
+                <img src="images/logo.png" alt="我的摊位" class="logo-image" style="max-width: 80px;">
             </div>
             <h1>欢迎光临</h1>
             <p class="subtitle">扫码点餐 · 凭号取餐</p>
         </div>
         
-        <div class="sequence-card">
+        <div class="sequence-card" style="margin: 0 15px 20px;">
             <div style="font-size: 14px; color: var(--light-text);">
                 您的取餐号是
             </div>
@@ -867,7 +923,7 @@
             </button>
         </div>
         
-        <div class="smart-recommend">
+        <div class="smart-recommend" style="margin: 0 15px 20px;">
             <div class="recommend-title">
                 <i class="fas fa-crown"></i> 今日推荐
             </div>
@@ -887,7 +943,7 @@
         </div>
     </div>
 
-    <!-- 菜单页面 -->
+    <!-- 菜单页面 - 使用flex布局修复滚动问题 -->
     <div id="menuPage" class="page hidden">
         <div class="menu-header">
             <button class="back-btn" onclick="backToSequence()">
@@ -908,9 +964,11 @@
             <!-- 动态生成 -->
         </div>
 
-        <!-- 菜品列表 -->
-        <div class="dishes-container" id="dishesContainer">
-            <!-- 动态生成 -->
+        <!-- 可滚动的菜品内容区域 -->
+        <div class="menu-content" id="menuContent">
+            <div class="dishes-container" id="dishesContainer">
+                <!-- 动态生成 -->
+            </div>
         </div>
 
         <!-- 底部购物车栏 -->
@@ -992,15 +1050,15 @@
             
             <div class="payment-area">
                 <div class="payment-title">扫码支付</div>
-                <div class="payment-tip">请提交订单后扫描摊位前二维码</div>
+                <div class="payment-tip">请选择支付方式并扫描下方二维码</div>
                 
-                <!-- 收款码错误提示（新增） -->
+                <!-- 收款码错误提示 -->
                 <div id="qrErrorContainer" style="display: none;">
                     <!-- 动态生成错误信息 -->
                 </div>
                 
-                <!-- 支付方式选择（新增） -->
-                <div class="payment-methods" id="paymentMethods" style="display: none; flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                <!-- 支付方式选择 -->
+                <div class="payment-methods" id="paymentMethods" style="display: none;">
                     <button class="payment-method-btn active" id="paymentMethodWechat" onclick="switchPaymentMethod('wechat')">
                         <i class="fab fa-weixin"></i> 微信支付
                     </button>
@@ -1083,64 +1141,12 @@
     // 全局变量和配置
     // ============================================
     window._cart = [];
-    window._dishesData = []; // 将在初始化时从商家配置加载
-    window.currentShopId = ''; // 当前商家ID
-    window.currentShopConfig = null; // 当前商家配置
-    window.shopPaymentQR = null; // 商家收款码配置
-    window.currentPaymentMethod = 'wechat'; // 当前支付方式
+    window._dishesData = [];
+    window.currentShopId = '';
+    window.currentShopConfig = null;
+    window.shopPaymentQR = null;
+    window.currentPaymentMethod = 'wechat';
 
-// ============================================
-// 从Supabase动态加载商家菜品
-// ============================================
-async function loadShopDishesFromSupabase(shopId) {
-    try {
-        console.log('📋 从Supabase加载商家菜品，商家ID:', shopId);
-        
-        // 检查Supabase是否已连接
-        if (!window.supabaseClient || !window.isCloudConnected) {
-            console.log('📝 Supabase未连接，使用默认菜品');
-            return null;
-        }
-        
-        // 从Supabase加载商家的菜品
-        const { data: dishes, error } = await window.supabaseClient
-            .from('dishes')
-            .select('*')
-            .eq('tenant_id', shopId)
-            .eq('is_active', true)
-            .order('sort_order', { ascending: true });
-        
-        if (error) {
-            console.error('❌ 从Supabase加载菜品失败:', error);
-            return null;
-        }
-        
-        if (dishes && dishes.length > 0) {
-            console.log('✅ 从Supabase加载到菜品:', dishes.length, '个');
-            
-            // 转换数据格式
-            const formattedDishes = dishes.map(dish => ({
-                id: dish.id,
-                name: dish.name,
-                price: parseFloat(dish.price),
-                emoji: dish.emoji || '🍽️',
-                category: dish.category || '未分类',
-                tags: dish.tags || [],
-                description: dish.description || ''
-            }));
-            
-            return formattedDishes;
-        }
-        
-        console.log('📝 Supabase中没有找到菜品');
-        return null;
-        
-    } catch (error) {
-        console.error('❌ 加载菜品异常:', error);
-        return null;
-    }
-}
-    
     // Supabase配置
     const SUPABASE_URL = 'https://slonbvmhsxqgpoodwazj.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsb25idm1oc3hxZ3Bvb2R3YXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzMyNjQsImV4cCI6MjA4NDYwOTI2NH0.YLZqdnZl1vDTOrT6bzi2ulN1BGRxKGyW30AuccuWJq4';
@@ -1158,98 +1164,141 @@ async function loadShopDishesFromSupabase(shopId) {
     window.orderStatusInterval = null;
     
     // ============================================
-// 初始化函数 - 多商家支持
-// ============================================
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 系统初始化...');
-    
-    // 1. 获取当前商家配置
-    window.currentShopId = getCurrentShopId();
-    window.currentShopConfig = getCurrentShopConfig();
-    
-    console.log('🏪 当前商家:', window.currentShopConfig.name, 'ID:', window.currentShopId);
-    
-    // 2. 更新页面主题
-    updateThemeForShop(window.currentShopConfig);
-    
-    // 3. 初始化Supabase连接
-    await initSupabaseConnection();
-    
-    // 4. 🔥 新增：获取商家收款码配置（如果已连接云端）
-    if (window.isCloudConnected) {
-        await fetchShopPaymentQR();
-    }
-    
-    // 5. 生成顺序号
-    await generateSequenceNumber();
-    
-    // 6. 动态加载菜品（优先从Supabase加载）
-    await loadShopDishes();
-    
-    // 7. 初始化菜品分类
-    initCategories();
-    
-    // 8. 加载菜品显示
-    loadDishes();
-    
-    // 9. 加载推荐菜品（从Supabase）- 优先加载
-    await loadRecommendations();
-    
-    // 10. 更新等待信息
-    updateWaitingInfo();
-    
-    console.log('✅ 系统初始化完成');
-});
-
-// ============================================
-// 获取商家收款码配置（新增函数）
-// ============================================
-async function fetchShopPaymentQR() {
-    try {
-        if (!window.supabaseClient || !window.isCloudConnected || !window.currentShopId) {
-            console.log('📝 无法获取收款码：未连接云端或无商家ID');
-            window.shopPaymentQR = null;
-            return;
-        }
-        
-        console.log('📱 获取商家收款码配置，商家ID:', window.currentShopId);
-        
-        // 从Supabase的shops表获取商家配置
-        const { data: shopData, error } = await window.supabaseClient
-            .from('shops')
-            .select('wechat_qr_url, alipay_qr_url, name')
-            .eq('tenant_id', window.currentShopId)
-            .single();
-        
-        if (error) {
-            console.warn('⚠️ 获取商家收款码失败:', error.message);
-            console.log('错误详情:', error);
-            window.shopPaymentQR = null;
-            return;
-        }
-        
-        if (shopData) {
-            console.log('✅ 获取到商家收款码配置:', {
-                微信收款码: shopData.wechat_qr_url,
-                支付宝收款码: shopData.alipay_qr_url
-            });
+    // 从Supabase动态加载商家菜品
+    // ============================================
+    async function loadShopDishesFromSupabase(shopId) {
+        try {
+            console.log('📋 从Supabase加载商家菜品，商家ID:', shopId);
             
-            // 保存到全局变量中
-            window.shopPaymentQR = {
-                wechat: shopData.wechat_qr_url,
-                alipay: shopData.alipay_qr_url,
-                shopName: shopData.name
-            };
-        } else {
-            console.log('📝 商家未配置收款码');
-            window.shopPaymentQR = null;
+            if (!window.supabaseClient || !window.isCloudConnected) {
+                console.log('📝 Supabase未连接，使用默认菜品');
+                return null;
+            }
+            
+            const { data: dishes, error } = await window.supabaseClient
+                .from('dishes')
+                .select('*')
+                .eq('tenant_id', shopId)
+                .eq('is_active', true)
+                .order('sort_order', { ascending: true });
+            
+            if (error) {
+                console.error('❌ 从Supabase加载菜品失败:', error);
+                return null;
+            }
+            
+            if (dishes && dishes.length > 0) {
+                console.log('✅ 从Supabase加载到菜品:', dishes.length, '个');
+                
+                const formattedDishes = dishes.map(dish => ({
+                    id: dish.id,
+                    name: dish.name,
+                    price: parseFloat(dish.price),
+                    emoji: dish.emoji || '🍽️',
+                    category: dish.category || '未分类',
+                    tags: dish.tags || [],
+                    description: dish.description || ''
+                }));
+                
+                return formattedDishes;
+            }
+            
+            console.log('📝 Supabase中没有找到菜品');
+            return null;
+            
+        } catch (error) {
+            console.error('❌ 加载菜品异常:', error);
+            return null;
+        }
+    }
+    
+    // ============================================
+    // 初始化函数
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 系统初始化...');
+        
+        // 1. 获取当前商家配置
+        window.currentShopId = getCurrentShopId();
+        window.currentShopConfig = getCurrentShopConfig();
+        
+        console.log('🏪 当前商家:', window.currentShopConfig.name, 'ID:', window.currentShopId);
+        
+        // 2. 更新页面主题
+        updateThemeForShop(window.currentShopConfig);
+        
+        // 3. 初始化Supabase连接
+        await initSupabaseConnection();
+        
+        // 4. 获取商家收款码配置
+        if (window.isCloudConnected) {
+            await fetchShopPaymentQR();
         }
         
-    } catch (error) {
-        console.error('❌ 获取收款码配置异常:', error);
-        window.shopPaymentQR = null;
+        // 5. 生成顺序号
+        await generateSequenceNumber();
+        
+        // 6. 动态加载菜品
+        await loadShopDishes();
+        
+        // 7. 初始化菜品分类
+        initCategories();
+        
+        // 8. 加载菜品显示
+        loadDishes();
+        
+        // 9. 加载推荐菜品
+        await loadRecommendations();
+        
+        // 10. 更新等待信息
+        updateWaitingInfo();
+        
+        console.log('✅ 系统初始化完成');
+    });
+
+    // ============================================
+    // 获取商家收款码配置
+    // ============================================
+    async function fetchShopPaymentQR() {
+        try {
+            if (!window.supabaseClient || !window.isCloudConnected || !window.currentShopId) {
+                console.log('📝 无法获取收款码：未连接云端或无商家ID');
+                window.shopPaymentQR = null;
+                return;
+            }
+            
+            console.log('📱 获取商家收款码配置，商家ID:', window.currentShopId);
+            
+            const { data: shopData, error } = await window.supabaseClient
+                .from('shops')
+                .select('wechat_qr_url, alipay_qr_url, name')
+                .eq('tenant_id', window.currentShopId)
+                .single();
+            
+            if (error) {
+                console.warn('⚠️ 获取商家收款码失败:', error.message);
+                window.shopPaymentQR = null;
+                return;
+            }
+            
+            if (shopData) {
+                console.log('✅ 获取到商家收款码配置');
+                
+                window.shopPaymentQR = {
+                    wechat: shopData.wechat_qr_url,
+                    alipay: shopData.alipay_qr_url,
+                    shopName: shopData.name
+                };
+            } else {
+                console.log('📝 商家未配置收款码');
+                window.shopPaymentQR = null;
+            }
+            
+        } catch (error) {
+            console.error('❌ 获取收款码配置异常:', error);
+            window.shopPaymentQR = null;
+        }
     }
-}
     
     // ============================================
     // 动态加载商家菜品
@@ -1258,20 +1307,16 @@ async function fetchShopPaymentQR() {
         try {
             console.log('🍽️ 开始加载商家菜品...');
             
-            // 先尝试从Supabase加载
             const supabaseDishes = await loadShopDishesFromSupabase(window.currentShopId);
             
             if (supabaseDishes && supabaseDishes.length > 0) {
-                // 使用Supabase中的菜品数据
                 window._dishesData = supabaseDishes;
                 console.log('✅ 使用Supabase菜品数据:', supabaseDishes.length, '个菜品');
             } else {
-                // 如果Supabase没有数据，使用商家配置中的菜品
                 window._dishesData = window.currentShopConfig.dishes || [];
                 console.log('📝 使用商家配置中的菜品数据:', window._dishesData.length, '个菜品');
             }
             
-            // 如果没有菜品，显示提示
             if (window._dishesData.length === 0) {
                 console.warn('⚠️ 没有找到任何菜品数据');
                 showToast('当前商家暂无菜品', 'warning');
@@ -1279,58 +1324,97 @@ async function fetchShopPaymentQR() {
             
         } catch (error) {
             console.error('❌ 加载菜品失败:', error);
-            
-            // 出错时使用商家配置中的菜品
             window._dishesData = window.currentShopConfig.dishes || [];
-            console.log('📝 出错时使用商家配置中的菜品数据:', window._dishesData.length, '个菜品');
         }
     }
     
     // ============================================
-    // 生成顺序号（从云端获取）- 多商家支持
+    // 生成顺序号
     // ============================================
     async function generateSequenceNumber() {
-    try {
-        console.log('🎫 开始生成取餐码，商家:', window.currentShopId);
-        
-        if (window.supabaseClient && window.isCloudConnected) {
-            console.log('🌐 从云端获取取餐码配置...');
+        try {
+            console.log('🎫 开始生成取餐码，商家:', window.currentShopId);
             
-            // 获取前缀 - 根据当前商家过滤
-            const [prefixResult, counterResult] = await Promise.all([
-                window.supabaseClient
-                    .from('settings')
-                    .select('setting_value')
-                    .eq('setting_key', 'sequence_prefix')
-                    .eq('tenant_id', window.currentShopId)
-                    .maybeSingle(),
+            if (window.supabaseClient && window.isCloudConnected) {
+                console.log('🌐 从云端获取取餐码配置...');
                 
-                window.supabaseClient
-                    .from('settings')
-                    .select('setting_value')
-                    .eq('setting_key', 'sequence_counter')
-                    .eq('tenant_id', window.currentShopId)
-                    .maybeSingle()
-            ]);
-            
-            // 🔥 如果前缀不是A-Z，自动修正为A
-            let prefix = prefixResult.data?.setting_value || 'A';
-            if (!/^[A-Z]$/.test(prefix)) {
-                prefix = 'A';
-                console.log('⚠️ 前缀格式不正确，自动修正为 A');
+                const [prefixResult, counterResult] = await Promise.all([
+                    window.supabaseClient
+                        .from('settings')
+                        .select('setting_value')
+                        .eq('setting_key', 'sequence_prefix')
+                        .eq('tenant_id', window.currentShopId)
+                        .maybeSingle(),
+                    
+                    window.supabaseClient
+                        .from('settings')
+                        .select('setting_value')
+                        .eq('setting_key', 'sequence_counter')
+                        .eq('tenant_id', window.currentShopId)
+                        .maybeSingle()
+                ]);
+                
+                let prefix = prefixResult.data?.setting_value || 'A';
+                if (!/^[A-Z]$/.test(prefix)) {
+                    prefix = 'A';
+                }
+                
+                window.sequencePrefix = prefix;
+                window.sequenceCounter = parseInt(counterResult.data?.setting_value) || 1;
+                
+            } else {
+                console.log('📝 使用本地配置');
+                const savedCounter = localStorage.getItem(`${window.currentShopId}_sequenceCounter`);
+                const savedPrefix = localStorage.getItem(`${window.currentShopId}_sequencePrefix`) || 'A';
+                
+                if (savedCounter) {
+                    window.sequenceCounter = parseInt(savedCounter);
+                    window.sequencePrefix = /^[A-Z]$/.test(savedPrefix) ? savedPrefix : 'A';
+                } else {
+                    window.sequencePrefix = 'A';
+                    window.sequenceCounter = 1;
+                }
             }
             
-            window.sequencePrefix = prefix;
-            window.sequenceCounter = parseInt(counterResult.data?.setting_value) || 1;
+            if (window.sequenceCounter > 999) {
+                const nextChar = String.fromCharCode(window.sequencePrefix.charCodeAt(0) + 1);
+                window.sequencePrefix = /^[A-Z]$/.test(nextChar) ? nextChar : 'A';
+                window.sequenceCounter = 1;
+            }
             
-            console.log('✅ 从云端获取配置（商家:', window.currentShopId, '）:', {
-                prefix: window.sequencePrefix,
-                counter: window.sequenceCounter
-            });
+            window.sequenceNumber = window.sequencePrefix + 
+                window.sequenceCounter.toString().padStart(3, '0');
             
-        } else {
-            console.log('📝 使用本地配置（商家:', window.currentShopId, '）');
-            // 从本地存储获取（按商家区分）
+            console.log('🎫 生成的顺序号:', window.sequenceNumber);
+            
+            const nextCounter = window.sequenceCounter + 1;
+            
+            if (window.supabaseClient && window.isCloudConnected) {
+                try {
+                    await window.supabaseClient
+                        .from('settings')
+                        .update({ 
+                            setting_value: nextCounter.toString(),
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('setting_key', 'sequence_counter')
+                        .eq('tenant_id', window.currentShopId);
+                } catch (updateError) {
+                    localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
+                    localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+                }
+            } else {
+                localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
+                localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+            }
+            
+            window.sequenceCounter = nextCounter;
+            
+            updateSequenceNumberDisplay();
+            
+        } catch (error) {
+            console.error('❌ 生成顺序号失败:', error);
+            
             const savedCounter = localStorage.getItem(`${window.currentShopId}_sequenceCounter`);
             const savedPrefix = localStorage.getItem(`${window.currentShopId}_sequencePrefix`) || 'A';
             
@@ -1341,98 +1425,25 @@ async function fetchShopPaymentQR() {
                 window.sequencePrefix = 'A';
                 window.sequenceCounter = 1;
             }
-        }
-        
-        // 如果超过999，递增前缀，重置计数器
-        if (window.sequenceCounter > 999) {
-            const nextChar = String.fromCharCode(window.sequencePrefix.charCodeAt(0) + 1);
-            window.sequencePrefix = /^[A-Z]$/.test(nextChar) ? nextChar : 'A';
-            window.sequenceCounter = 1;
-        }
-        
-        // 生成顺序号
-        window.sequenceNumber = window.sequencePrefix + 
-            window.sequenceCounter.toString().padStart(3, '0');
-        
-        console.log('🎫 生成的顺序号（商家:', window.currentShopId, '）:', window.sequenceNumber);
-        
-        // 递增计数器并保存
-        const nextCounter = window.sequenceCounter + 1;
-        
-        if (window.supabaseClient && window.isCloudConnected) {
-            try {
-                // 更新云端计数器 - 确保按商家更新
-                const { error: updateError } = await window.supabaseClient
-                    .from('settings')
-                    .update({ 
-                        setting_value: nextCounter.toString(),
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('setting_key', 'sequence_counter')
-                    .eq('tenant_id', window.currentShopId);
-                
-                if (updateError) {
-                    console.warn('云端计数器更新失败:', updateError.message);
-                    // 回退到本地存储
-                    localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
-                    localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
-                } else {
-                    console.log('✅ 云端计数器已更新（商家:', window.currentShopId, '）:', nextCounter);
-                }
-            } catch (updateError) {
-                console.error('更新云端计数器异常:', updateError);
-                // 回退到本地存储
-                localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
-                localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
-            }
-        } else {
-            // 本地模式
-            localStorage.setItem(`${window.currentShopId}_sequenceCounter`, nextCounter.toString());
-            localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
-        }
-        
-        window.sequenceCounter = nextCounter;
-        
-        // 更新所有显示顺序号的地方
-        updateSequenceNumberDisplay();
-        
-    } catch (error) {
-        console.error('❌ 生成顺序号失败:', error);
-        
-        // 紧急回退方案
-        const savedCounter = localStorage.getItem(`${window.currentShopId}_sequenceCounter`);
-        const savedPrefix = localStorage.getItem(`${window.currentShopId}_sequencePrefix`) || 'A';
-        
-        if (savedCounter) {
-            window.sequenceCounter = parseInt(savedCounter);
-            window.sequencePrefix = /^[A-Z]$/.test(savedPrefix) ? savedPrefix : 'A';
-        } else {
-            window.sequencePrefix = 'A';
-            window.sequenceCounter = 1;
-        }
-        
-        // 生成顺序号
-        window.sequenceNumber = window.sequencePrefix + 
-            window.sequenceCounter.toString().padStart(3, '0');
             
-        // 递增计数器
-        window.sequenceCounter++;
-        localStorage.setItem(`${window.currentShopId}_sequenceCounter`, window.sequenceCounter.toString());
-        localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
-        
-        updateSequenceNumberDisplay();
+            window.sequenceNumber = window.sequencePrefix + 
+                window.sequenceCounter.toString().padStart(3, '0');
+                
+            window.sequenceCounter++;
+            localStorage.setItem(`${window.currentShopId}_sequenceCounter`, window.sequenceCounter.toString());
+            localStorage.setItem(`${window.currentShopId}_sequencePrefix`, window.sequencePrefix);
+            
+            updateSequenceNumberDisplay();
+        }
     }
-}
     
     // ============================================
-    // 监听取餐码配置变化 - 多商家支持
+    // 设置取餐码监听
     // ============================================
     function setupSequenceWatch() {
         if (!window.supabaseClient || !window.isCloudConnected) return;
         
         try {
-            console.log('📡 启动取餐码配置监听...');
-            
             window.supabaseClient
                 .channel('settings-channel')
                 .on('postgres_changes', 
@@ -1443,22 +1454,14 @@ async function fetchShopPaymentQR() {
                         filter: 'setting_key=in.(sequence_prefix,sequence_counter)'
                     }, 
                     async (payload) => {
-                        // 只监听当前商家的配置变化
                         if (payload.new.tenant_id === window.currentShopId) {
-                            console.log('📡 检测到取餐码配置更新:', payload.new);
-                            
-                            // 重新生成取餐码
+                            console.log('📡 检测到取餐码配置更新');
                             await generateSequenceNumber();
-                            
                             showToast('✅ 取餐码已更新', 'success');
                         }
                     }
                 )
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('✅ 取餐码配置监听已启动');
-                    }
-                });
+                .subscribe();
             
         } catch (error) {
             console.error('❌ 启动取餐码监听失败:', error);
@@ -1466,7 +1469,7 @@ async function fetchShopPaymentQR() {
     }
     
     // ============================================
-    // Supabase连接初始化（添加取餐码监听）
+    // Supabase连接初始化
     // ============================================
     async function initSupabaseConnection() {
         try {
@@ -1477,13 +1480,11 @@ async function fetchShopPaymentQR() {
             }
             
             window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase 客户端初始化成功');
             
-            // 测试连接 - 注意：加上tenant_id条件
             const { error } = await window.supabaseClient
                 .from('orders')
                 .select('*')
-                .eq('tenant_id', window.currentShopId) // 多商家支持
+                .eq('tenant_id', window.currentShopId)
                 .limit(1);
             
             if (error) {
@@ -1492,8 +1493,6 @@ async function fetchShopPaymentQR() {
             } else {
                 console.log('数据库连接测试成功');
                 window.isCloudConnected = true;
-                
-                // 🔥 启动取餐码配置监听
                 setupSequenceWatch();
             }
             
@@ -1504,25 +1503,16 @@ async function fetchShopPaymentQR() {
     }
     
     // ============================================
-    // 加载推荐菜品（从Supabase）- 多商家支持
+    // 加载推荐菜品
     // ============================================
     async function loadRecommendations() {
         try {
-            console.log('📋 加载推荐菜品...');
             const recommendContainer = document.getElementById('recommendationsList');
+            if (!recommendContainer) return;
             
-            if (!recommendContainer) {
-                console.error('❌ 推荐菜品容器未找到');
-                return;
-            }
-            
-            // 显示加载状态
             recommendContainer.innerHTML = '<div class="loading-recommend" style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-spinner fa-spin"></i> 正在加载推荐菜品...</div>';
             
-            // 检查Supabase连接
             if (!window.supabaseClient || !window.isCloudConnected) {
-                console.log('📝 Supabase未连接，使用默认推荐');
-                // 使用默认推荐
                 updateRecommendationsDisplay([
                     { name: '招牌菜品', price: 15, description: '今日特惠' },
                     { name: '人气套餐', price: 18, description: '人气推荐' }
@@ -1530,19 +1520,15 @@ async function fetchShopPaymentQR() {
                 return;
             }
             
-            // 从Supabase的recommendations表获取推荐菜品 - 加上tenant_id条件
             const { data, error } = await window.supabaseClient
                 .from('recommendations')
                 .select('*')
-                .eq('tenant_id', window.currentShopId) // 多商家支持：只获取当前商家的推荐
+                .eq('tenant_id', window.currentShopId)
                 .order('sort_order', { ascending: true })
                 .limit(5);
             
             if (error) {
                 console.warn('❌ 获取推荐菜品失败:', error.message);
-                console.log('错误详情:', error);
-                
-                // 使用默认推荐
                 updateRecommendationsDisplay([
                     { name: '招牌菜品', price: 15, description: '今日特惠' },
                     { name: '人气套餐', price: 18, description: '人气推荐' }
@@ -1551,20 +1537,14 @@ async function fetchShopPaymentQR() {
             }
             
             if (data && data.length > 0) {
-                console.log('✅ 加载到推荐菜品:', data.length, '个');
-                console.log('推荐菜品数据:', data);
-                
-                // 转换数据格式
                 const recommendations = data.map(item => ({
                     name: item.name,
                     price: item.price,
                     description: item.description || '',
                     sort_order: item.sort_order || 0
                 }));
-                
                 updateRecommendationsDisplay(recommendations);
             } else {
-                console.log('📝 无推荐菜品，使用默认');
                 updateRecommendationsDisplay([
                     { name: '招牌菜品', price: 15, description: '今日特惠' },
                     { name: '人气套餐', price: 18, description: '人气推荐' }
@@ -1573,8 +1553,6 @@ async function fetchShopPaymentQR() {
             
         } catch (error) {
             console.error('❌ 加载推荐菜品异常:', error);
-            
-            // 使用默认推荐
             updateRecommendationsDisplay([
                 { name: '招牌菜品', price: 15, description: '今日特惠' },
                 { name: '人气套餐', price: 18, description: '人气推荐' }
@@ -1587,7 +1565,6 @@ async function fetchShopPaymentQR() {
         const recommendContainer = document.getElementById('recommendationsList');
         if (!recommendContainer) return;
         
-        // 清空现有推荐
         recommendContainer.innerHTML = '';
         
         if (!recommendations || recommendations.length === 0) {
@@ -1595,33 +1572,25 @@ async function fetchShopPaymentQR() {
             return;
         }
         
-        // 添加推荐菜品
         recommendations.forEach(item => {
             const recommendItem = document.createElement('div');
             recommendItem.className = 'recommend-item';
             
-            // 为推荐菜品添加点击事件
             recommendItem.onclick = function() {
-                // 尝试在菜品列表中查找匹配的菜品
                 const dish = window._dishesData.find(d => {
-                    // 检查菜品名称是否包含推荐名称（忽略空格和特殊字符）
                     const dishName = d.name.replace(/\s+/g, '');
                     const recommendName = item.name.replace(/\s+/g, '');
                     return dishName.includes(recommendName) || recommendName.includes(dishName);
                 });
                 
                 if (dish) {
-                    // 找到对应菜品，添加到购物车
                     addRecommendation(dish.name);
                     showToast(`已添加 ${item.name}`, 'success');
                 } else {
-                    // 没有找到完全匹配的菜品，尝试添加到自定义菜品
-                    console.log('未找到匹配菜品，尝试添加到自定义:', item.name);
                     addCustomRecommendation(item);
                 }
             };
             
-            // 显示名称和价格
             let displayText = item.name;
             if (item.description && item.description.trim() !== '') {
                 displayText += ` (${item.description})`;
@@ -1636,21 +1605,17 @@ async function fetchShopPaymentQR() {
         });
     }
     
-    // 添加自定义推荐菜品到购物车
+    // 添加自定义推荐菜品
     function addCustomRecommendation(item) {
-        // 生成一个临时的菜品ID（使用负数避免与现有菜品冲突）
         const tempId = -Date.now();
         
-        // 检查是否已经在购物车中
         const existingItem = window._cart.find(cartItem => 
             cartItem.name === item.name && cartItem.isCustom
         );
         
         if (existingItem) {
-            // 如果已存在，增加数量
             existingItem.quantity++;
         } else {
-            // 添加到购物车
             window._cart.push({
                 id: tempId,
                 name: item.name,
@@ -1666,151 +1631,113 @@ async function fetchShopPaymentQR() {
     }
     
     // ============================================
-// 刷新订单状态函数 - 多商家支持
-// ============================================
-async function refreshOrderStatus() {
-    try {
-        const refreshBtn = document.getElementById('refreshBtn');
-        const refreshIcon = document.getElementById('refreshIcon');
-        const orderNumber = window.currentOrderNumber;
-        
-        if (!orderNumber) {
-            console.log('❌ 未找到当前订单号');
-            showToast('请先提交订单', 'error');
-            return;
-        }
-        
-        // 显示刷新动画
-        refreshBtn.disabled = true;
-        refreshIcon.classList.add('fa-spin');
-        
-        console.log('🔄 刷新订单状态:', orderNumber);
-        
-        if (!window.supabaseClient || !window.isCloudConnected) {
-            console.log('📝 使用模拟数据');
-            // 模拟数据
-            const statuses = ['等待接单', '处理中', '已完成', '已取消'];
-            const randomStatus = statuses[Math.floor(Math.random() * 3)]; // 不包括已取消
-            const randomQueue = Math.floor(Math.random() * 5);
+    // 刷新订单状态
+    // ============================================
+    async function refreshOrderStatus() {
+        try {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+            const orderNumber = window.currentOrderNumber;
             
-            document.getElementById('orderStatus').textContent = randomStatus;
-            document.getElementById('queueAhead').textContent = randomQueue + '单';
+            if (!orderNumber) {
+                showToast('请先提交订单', 'error');
+                return;
+            }
             
-            // 计算预计取餐时间
-            const now = new Date();
-            const minutes = (randomQueue + 1) * 5; // 每单5分钟
-            const pickupTime = new Date(now.getTime() + minutes * 60000);
-            document.getElementById('pickupTime').textContent = 
-                pickupTime.getHours().toString().padStart(2, '0') + ':' + 
-                pickupTime.getMinutes().toString().padStart(2, '0');
+            refreshBtn.disabled = true;
+            refreshIcon.classList.add('fa-spin');
             
-            document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
-            
-            showToast('订单状态已更新', 'success');
-        } else {
-            // 从Supabase获取当前订单状态 - 加上tenant_id条件
-            const { data: orderData, error: orderError } = await window.supabaseClient
-                .from('orders')
-                .select('status, timestamp, table')
-                .eq('order_number', orderNumber)
-                .eq('tenant_id', window.currentShopId) // 多商家支持
-                .single();
-            
-            if (orderError) {
-                console.error('❌ 获取订单状态失败:', orderError);
-                showToast('获取订单状态失败', 'error');
-            } else if (orderData) {
-                console.log('✅ 获取到订单状态:', orderData);
+            if (!window.supabaseClient || !window.isCloudConnected) {
+                const statuses = ['等待接单', '处理中', '已完成'];
+                const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                const randomQueue = Math.floor(Math.random() * 5);
                 
-                // 更新订单状态
-                document.getElementById('orderStatus').textContent = orderData.status || '等待接单';
+                document.getElementById('orderStatus').textContent = randomStatus;
+                document.getElementById('queueAhead').textContent = randomQueue + '单';
                 
-                // 🔥 获取商家端所有新订单+处理中订单数量（累加求和）- 加上tenant_id条件
-                const { data: pendingOrders, error: pendingError } = await window.supabaseClient
-                    .from('orders')
-                    .select('*')
-                    .eq('tenant_id', window.currentShopId) // 多商家支持：只查询当前商家的订单
-                    .in('status', ['新订单', '处理中'])
-                    .order('timestamp', { ascending: true });
-                
-                if (!pendingError && pendingOrders) {
-                    // 计算前方等待订单数：所有新订单+处理中订单中，时间戳早于当前订单的数量
-                    const queueCount = pendingOrders.filter(order => 
-                        order.timestamp < orderData.timestamp && 
-                        order.order_number !== orderNumber
-                    ).length;
-                    
-                    console.log('📊 前方等待订单计算:', {
-                        总待处理订单: pendingOrders.length,
-                        当前订单时间戳: orderData.timestamp,
-                        前方等待订单数: queueCount
-                    });
-                    
-                    document.getElementById('queueAhead').textContent = queueCount + '单';
-                    
-                    // 计算预计取餐时间（每单5分钟）
-                    const now = new Date();
-                    const minutes = (queueCount + 1) * 5; // 当前订单也要5分钟
-                    const pickupTime = new Date(now.getTime() + minutes * 60000);
-                    document.getElementById('pickupTime').textContent = 
-                        pickupTime.getHours().toString().padStart(2, '0') + ':' + 
-                        pickupTime.getMinutes().toString().padStart(2, '0');
-                } else {
-                    // 如果查询失败，使用默认值
-                    document.getElementById('queueAhead').textContent = '2单';
-                    const now = new Date();
-                    const pickupTime = new Date(now.getTime() + 15 * 60000);
-                    document.getElementById('pickupTime').textContent = 
-                        pickupTime.getHours().toString().padStart(2, '0') + ':' + 
-                        pickupTime.getMinutes().toString().padStart(2, '0');
-                }
+                const now = new Date();
+                const minutes = (randomQueue + 1) * 5;
+                const pickupTime = new Date(now.getTime() + minutes * 60000);
+                document.getElementById('pickupTime').textContent = 
+                    pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+                    pickupTime.getMinutes().toString().padStart(2, '0');
                 
                 document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
                 
-                // 如果订单已完成或已取消，停止自动刷新
-                if (orderData.status === '已完成' || orderData.status === '已取消') {
-                    if (window.orderStatusInterval) {
-                        clearInterval(window.orderStatusInterval);
-                        window.orderStatusInterval = null;
-                        showToast('订单已' + orderData.status + '，停止自动刷新', 'success');
+                showToast('订单状态已更新', 'success');
+            } else {
+                const { data: orderData, error: orderError } = await window.supabaseClient
+                    .from('orders')
+                    .select('status, timestamp, table')
+                    .eq('order_number', orderNumber)
+                    .eq('tenant_id', window.currentShopId)
+                    .single();
+                
+                if (orderError) {
+                    showToast('获取订单状态失败', 'error');
+                } else if (orderData) {
+                    document.getElementById('orderStatus').textContent = orderData.status || '等待接单';
+                    
+                    const { data: pendingOrders, error: pendingError } = await window.supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('tenant_id', window.currentShopId)
+                        .in('status', ['新订单', '处理中'])
+                        .order('timestamp', { ascending: true });
+                    
+                    if (!pendingError && pendingOrders) {
+                        const queueCount = pendingOrders.filter(order => 
+                            order.timestamp < orderData.timestamp && 
+                            order.order_number !== orderNumber
+                        ).length;
+                        
+                        document.getElementById('queueAhead').textContent = queueCount + '单';
+                        
+                        const now = new Date();
+                        const minutes = (queueCount + 1) * 5;
+                        const pickupTime = new Date(now.getTime() + minutes * 60000);
+                        document.getElementById('pickupTime').textContent = 
+                            pickupTime.getHours().toString().padStart(2, '0') + ':' + 
+                            pickupTime.getMinutes().toString().padStart(2, '0');
                     }
-                } else {
+                    
+                    document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+                    
+                    if (orderData.status === '已完成' || orderData.status === '已取消') {
+                        if (window.orderStatusInterval) {
+                            clearInterval(window.orderStatusInterval);
+                            window.orderStatusInterval = null;
+                        }
+                    }
+                    
                     showToast('订单状态已更新', 'success');
                 }
-            } else {
-                showToast('未找到订单信息', 'warning');
             }
+            
+        } catch (error) {
+            console.error('❌ 刷新订单状态异常:', error);
+            showToast('刷新失败', 'error');
+        } finally {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshBtn) refreshBtn.disabled = false;
+            if (refreshIcon) refreshIcon.classList.remove('fa-spin');
         }
-        
-    } catch (error) {
-        console.error('❌ 刷新订单状态异常:', error);
-        showToast('刷新失败', 'error');
-    } finally {
-        // 恢复按钮状态
-        const refreshBtn = document.getElementById('refreshBtn');
-        const refreshIcon = document.getElementById('refreshIcon');
-        if (refreshBtn) refreshBtn.disabled = false;
-        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
     }
-}
     
     // ============================================
-    // 在成功页面启动自动刷新
+    // 启动自动刷新
     // ============================================
     function startAutoRefresh() {
-        // 先执行一次刷新
         refreshOrderStatus();
         
-        // 设置定时刷新（每30秒一次）
         if (window.orderStatusInterval) {
             clearInterval(window.orderStatusInterval);
         }
         
         window.orderStatusInterval = setInterval(() => {
             refreshOrderStatus();
-        }, 30000); // 30秒
-        
-        console.log('⏰ 启动自动刷新，间隔30秒');
+        }, 30000);
     }
     
     // 更新顺序号显示
@@ -1826,7 +1753,6 @@ async function refreshOrderStatus() {
         const categoryTabs = document.getElementById('categoryTabs');
         if (!categoryTabs) return;
         
-        // 获取所有分类
         const categories = ['全部', ...new Set(window._dishesData.map(dish => dish.category))];
         
         categoryTabs.innerHTML = categories.map(category => 
@@ -1839,27 +1765,23 @@ async function refreshOrderStatus() {
     
     // 过滤菜品
     function filterDishes(category) {
-        // 更新标签状态
         document.querySelectorAll('.category-tab').forEach(tab => {
             tab.classList.remove('active');
         });
         event.target.classList.add('active');
         
-        // 加载对应分类的菜品
         loadDishes(category === '全部' ? null : category);
     }
     
-    // 加载菜品（修改：数量控制器移到名称后面）
+    // 加载菜品
     function loadDishes(category = null) {
         const dishesContainer = document.getElementById('dishesContainer');
         if (!dishesContainer) return;
         
-        // 过滤菜品
         const filteredDishes = category 
             ? window._dishesData.filter(dish => dish.category === category)
             : window._dishesData;
         
-        // 生成菜品HTML - 修复：将数量控制器放在名称和价格的同一行，紧跟在价格后面
         dishesContainer.innerHTML = filteredDishes.map(dish => {
             const cartItem = window._cart.find(item => item.id === dish.id);
             const quantity = cartItem ? cartItem.quantity : 0;
@@ -1868,11 +1790,11 @@ async function refreshOrderStatus() {
             <div class="dish-card">
                 <div class="dish-emoji">${dish.emoji}</div>
                 <div class="dish-details">
-                    <div class="dish-info-row" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%;">
+                    <div class="dish-info-row">
                         <span class="dish-name">${dish.name}</span>
                         <span class="dish-price">¥${dish.price}</span>
-                        <div class="dish-actions" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                            <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})" ${quantity === 0 ? 'disabled style="opacity:0.3"' : ''}>
+                        <div class="dish-actions">
+                            <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})" ${quantity === 0 ? 'disabled' : ''}>
                                 <i class="fas fa-minus"></i>
                             </button>
                             <span class="dish-quantity">${quantity}</span>
@@ -1905,7 +1827,7 @@ async function refreshOrderStatus() {
         }
         
         updateCartDisplay();
-        loadDishes(); // 刷新菜品列表
+        loadDishes();
     }
     
     // 减少菜品数量
@@ -1920,7 +1842,7 @@ async function refreshOrderStatus() {
         }
         
         updateCartDisplay();
-        loadDishes(); // 刷新菜品列表
+        loadDishes();
     }
     
     // 更新购物车显示
@@ -1928,23 +1850,16 @@ async function refreshOrderStatus() {
         const totalItems = window._cart.reduce((sum, item) => sum + item.quantity, 0);
         const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
-        // 更新购物车徽章
         document.getElementById('cartBadge').textContent = totalItems;
-        
-        // 更新购物车状态
         document.getElementById('cartStatus').textContent = totalItems > 0 ? `已选 ${totalItems} 个菜品` : '未选择菜品';
-        
-        // 更新底部购物车栏
         document.getElementById('cartItemsCount').textContent = `${totalItems}个菜品`;
         document.getElementById('cartTotal').textContent = totalAmount.toFixed(2);
         
-        // 更新结账按钮状态
         const checkoutBtn = document.getElementById('checkoutBtn');
         const modalCheckoutBtn = document.getElementById('modalCheckoutBtn');
         if (checkoutBtn) checkoutBtn.disabled = totalItems === 0;
         if (modalCheckoutBtn) modalCheckoutBtn.disabled = totalItems === 0;
         
-        // 更新购物车弹窗
         updateCartModal();
     }
     
@@ -1964,17 +1879,17 @@ async function refreshOrderStatus() {
         }
         
         cartItems.innerHTML = window._cart.map(item => `
-            <div class="cart-item">
-                <div class="item-info">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-price">¥${item.price} × ${item.quantity}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                <div>
+                    <div style="font-weight: 600;">${item.name}</div>
+                    <div style="color: #666; font-size: 14px;">¥${item.price} × ${item.quantity}</div>
                 </div>
-                <div class="item-actions">
-                    <button onclick="decreaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="decreaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;cursor:pointer;">
                         <i class="fas fa-minus"></i>
                     </button>
                     <span style="min-width:30px;text-align:center;">${item.quantity}</span>
-                    <button onclick="increaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;">
+                    <button onclick="increaseQuantity(${item.id})" style="width:28px;height:28px;border-radius:50%;border:1px solid #e0e0e0;background:white;cursor:pointer;">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -2005,7 +1920,6 @@ async function refreshOrderStatus() {
     // 页面导航函数
     // ============================================
     window.enterMenu = function() {
-        // 从顺序号页面切换到菜单页面
         switchPage('sequencePage', 'menuPage');
     };
     
@@ -2020,28 +1934,22 @@ async function refreshOrderStatus() {
     };
     
     window.backToMenu = function() {
-        // 从结账页面返回菜单页面
         switchPage('checkoutPage', 'menuPage');
     };
     
     window.showCartModal = function() {
-        // 显示购物车弹窗
         document.getElementById('cartModal').classList.remove('hidden');
     };
     
     window.hideCartModal = function() {
-        // 隐藏购物车弹窗
         document.getElementById('cartModal').classList.add('hidden');
     };
     
-    // ============================================
-    // 更新二维码显示（修改后的函数）
-    // ============================================
+    // 更新二维码显示
     function updateQRCodeDisplay() {
         const qrcodeImg = document.getElementById('qrcodeImg');
         const qrcodeAmount = document.getElementById('qrcodeAmount');
         const qrcodeOverlay = document.querySelector('.qrcode-overlay');
-        const qrcodeWrapper = document.getElementById('qrcodeWrapper');
         const paymentMethods = document.getElementById('paymentMethods');
         const qrErrorContainer = document.getElementById('qrErrorContainer');
         const submitOrderBtn = document.getElementById('submitOrderBtn');
@@ -2051,90 +1959,70 @@ async function refreshOrderStatus() {
         const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         qrcodeAmount.textContent = totalAmount.toFixed(2);
         
-        // 清空错误容器
         qrErrorContainer.innerHTML = '';
         qrErrorContainer.style.display = 'none';
         
-        // 检查是否有商家收款码配置
         if (window.shopPaymentQR) {
-            const { wechat, alipay, shopName } = window.shopPaymentQR;
+            const { wechat, alipay } = window.shopPaymentQR;
             
-            // 🔥 检查是否有有效的收款码
             const hasWechatQR = wechat && wechat.trim() !== '';
             const hasAlipayQR = alipay && alipay.trim() !== '';
             
             if (!hasWechatQR && !hasAlipayQR) {
-                // 两种收款码都没有，显示错误信息
                 showQRCodeError("商家尚未配置收款码", "请联系商家上传微信或支付宝收款码后再下单");
                 submitOrderBtn.disabled = true;
                 return false;
             }
             
-            // 隐藏二维码容器，等待设置
             qrcodeImg.style.display = 'none';
             qrcodeOverlay.style.display = 'none';
             
-            // 如果有两种收款码，显示支付方式选择
             if (hasWechatQR && hasAlipayQR) {
                 paymentMethods.style.display = 'flex';
                 
-                // 设置默认支付方式（微信）
                 currentPaymentMethod = 'wechat';
                 qrcodeImg.src = wechat;
                 qrcodeImg.style.display = 'block';
                 qrcodeOverlay.style.display = 'block';
                 
-                // 更新按钮状态
                 document.getElementById('paymentMethodWechat').classList.add('active');
                 document.getElementById('paymentMethodAlipay').classList.remove('active');
                 
-                console.log('✅ 已设置微信收款码:', wechat);
                 submitOrderBtn.disabled = false;
                 return true;
-            } 
-            // 如果只有微信收款码
-            else if (hasWechatQR) {
+            } else if (hasWechatQR) {
                 paymentMethods.style.display = 'none';
                 qrcodeImg.src = wechat;
                 qrcodeImg.style.display = 'block';
                 qrcodeOverlay.style.display = 'block';
-                console.log('✅ 已设置微信收款码（单一）:', wechat);
                 submitOrderBtn.disabled = false;
                 return true;
-            }
-            // 如果只有支付宝收款码
-            else if (hasAlipayQR) {
+            } else if (hasAlipayQR) {
                 paymentMethods.style.display = 'none';
                 qrcodeImg.src = alipay;
                 qrcodeImg.style.display = 'block';
                 qrcodeOverlay.style.display = 'block';
-                console.log('✅ 已设置支付宝收款码（单一）:', alipay);
                 submitOrderBtn.disabled = false;
                 return true;
             }
         } else {
-            // 没有商家配置，显示错误信息
             showQRCodeError("无法获取商家收款码", "商家收款码配置信息未找到，请稍后再试或联系商家");
             submitOrderBtn.disabled = true;
             return false;
         }
     }
     
-    // ============================================
-    // 显示收款码错误信息（新增函数）
-    // ============================================
+    // 显示收款码错误信息
     function showQRCodeError(title, message) {
         const qrErrorContainer = document.getElementById('qrErrorContainer');
         const qrcodeImg = document.getElementById('qrcodeImg');
         const qrcodeOverlay = document.querySelector('.qrcode-overlay');
         const paymentMethods = document.getElementById('paymentMethods');
         
-        // 隐藏支付相关元素
         if (qrcodeImg) qrcodeImg.style.display = 'none';
         if (qrcodeOverlay) qrcodeOverlay.style.display = 'none';
         if (paymentMethods) paymentMethods.style.display = 'none';
         
-        // 显示错误信息
         qrErrorContainer.innerHTML = `
             <div class="qr-error-message">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -2146,217 +2034,137 @@ async function refreshOrderStatus() {
             </div>
         `;
         qrErrorContainer.style.display = 'block';
-        
-        console.warn('⚠️ 收款码错误:', title, '-', message);
     }
     
-    // ============================================
-    // 支付方式切换（新增函数）
-    // ============================================
+    // 支付方式切换
     window.switchPaymentMethod = function(method) {
-        console.log('🔄 切换支付方式:', method);
-        
         const wechatBtn = document.getElementById('paymentMethodWechat');
         const alipayBtn = document.getElementById('paymentMethodAlipay');
         const qrcodeImg = document.getElementById('qrcodeImg');
         
-        if (!window.shopPaymentQR) {
-            console.warn('⚠️ 未获取到商家收款码配置');
-            return;
-        }
+        if (!window.shopPaymentQR) return;
         
         currentPaymentMethod = method;
         
-        // 更新按钮状态
         if (method === 'wechat') {
             wechatBtn.classList.add('active');
             alipayBtn.classList.remove('active');
             
-            // 切换到微信收款码
             if (window.shopPaymentQR.wechat && window.shopPaymentQR.wechat.trim() !== '') {
                 qrcodeImg.src = window.shopPaymentQR.wechat;
-                console.log('✅ 已切换到微信收款码');
-            } else {
-                console.warn('⚠️ 商家未配置微信收款码');
-                showQRCodeError("微信收款码未配置", "商家尚未上传微信收款码，请选择其他支付方式或联系商家");
             }
         } else if (method === 'alipay') {
             wechatBtn.classList.remove('active');
             alipayBtn.classList.add('active');
             
-            // 切换到支付宝收款码
             if (window.shopPaymentQR.alipay && window.shopPaymentQR.alipay.trim() !== '') {
                 qrcodeImg.src = window.shopPaymentQR.alipay;
-                console.log('✅ 已切换到支付宝收款码');
-            } else {
-                console.warn('⚠️ 商家未配置支付宝收款码');
-                showQRCodeError("支付宝收款码未配置", "商家尚未上传支付宝收款码，请选择其他支付方式或联系商家");
             }
         }
     }
     
-    // ============================================
-// 页面导航函数
-// ============================================
-window.goToCheckout = function() {
-    if (window._cart.length === 0) {
-        alert('请先选择菜品');
-        return;
-    }
-    
-    // 🔥 检查是否有商家收款码配置
-    if (window.shopPaymentQR) {
-        const { wechat, alipay } = window.shopPaymentQR;
-        const hasWechatQR = wechat && wechat.trim() !== '';
-        const hasAlipayQR = alipay && alipay.trim() !== '';
-        
-        if (!hasWechatQR && !hasAlipayQR) {
-            alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
+    // 前往结账
+    window.goToCheckout = function() {
+        if (window._cart.length === 0) {
+            alert('请先选择菜品');
             return;
         }
-    } else if (window.isCloudConnected) {
-        // 尝试重新获取收款码配置
-        fetchShopPaymentQR().then(() => {
-            if (window.shopPaymentQR) {
-                const { wechat, alipay } = window.shopPaymentQR;
-                const hasWechatQR = wechat && wechat.trim() !== '';
-                const hasAlipayQR = alipay && alipay.trim() !== '';
-                
-                if (!hasWechatQR && !hasAlipayQR) {
-                    alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
-                    return;
-                }
-            } else {
+        
+        if (window.shopPaymentQR) {
+            const { wechat, alipay } = window.shopPaymentQR;
+            const hasWechatQR = wechat && wechat.trim() !== '';
+            const hasAlipayQR = alipay && alipay.trim() !== '';
+            
+            if (!hasWechatQR && !hasAlipayQR) {
                 alert('商家尚未配置收款码，无法完成支付，请稍后再试或联系商家。');
                 return;
             }
-            
-            // 继续执行结账流程
-            proceedToCheckout();
-        });
-        return;
-    }
-    
-    // 生成订单号
-    const now = new Date();
-    const year = now.getFullYear().toString().slice(-2);
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hour = String(now.getHours()).padStart(2, '0');
-    const minute = String(now.getMinutes()).padStart(2, '0');
-    const second = String(now.getSeconds()).padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    window.currentOrderNumber = year + month + day + hour + minute + second + random;
-    
-    // 更新结账页面信息
-    document.getElementById('orderNumber').textContent = window.currentOrderNumber;
-    document.getElementById('orderTime').textContent = now.toLocaleString('zh-CN');
-    
-    // 更新订单菜品列表
-    const checkoutItems = document.getElementById('checkoutItems');
-    checkoutItems.innerHTML = window._cart.map(item => `
-        <div class="order-item">
-            <span>${item.name} × ${item.quantity}</span>
-            <span>¥${(item.price * item.quantity).toFixed(2)}</span>
-        </div>
-    `).join('');
-    
-    // 更新总金额
-    const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    document.getElementById('finalAmount').textContent = totalAmount.toFixed(2);
-    document.getElementById('qrcodeAmount').textContent = totalAmount.toFixed(2);
-    
-    // 🔥 更新二维码显示（检查收款码）
-    updateQRCodeDisplay();
-    
-    // 隐藏购物车弹窗
-    hideCartModal();
-    
-    // 切换到结账页面
-    switchPage('menuPage', 'checkoutPage');
-};
-    
-    // ============================================
-// 提交订单函数（多商家支持）
-// ============================================
-window.submitOrder = async function() {
-    console.log('📤 提交订单...');
-    
-    if (window._cart.length === 0) {
-        alert('订单中没有菜品');
-        return;
-    }
-    
-    // 🔥 再次检查是否有有效的收款码（但只检查，不阻止提交）
-    if (window.shopPaymentQR) {
-        const { wechat, alipay } = window.shopPaymentQR;
-        const hasWechatQR = wechat && wechat.trim() !== '';
-        const hasAlipayQR = alipay && alipay.trim() !== '';
-        
-        if (!hasWechatQR && !hasAlipayQR) {
-            if (!confirm('商家尚未配置收款码，订单提交后顾客无法支付。确定要继续提交吗？')) {
-                return;
-            }
         }
-    }
-    
-    // 显示加载动画
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-    
-    const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const orderTime = new Date().toLocaleString('zh-CN');
-    const dishesString = window._cart.map(item => 
-        `${item.name} × ${item.quantity} = ¥${(item.price * item.quantity).toFixed(2)}`
-    ).join('; ');
-    
-    // 构建订单数据 - 添加tenant_id字段
-    const orderData = {
-        table: window.sequenceNumber,
-        dishes: dishesString,
-        status: '新订单',
-        timestamp: Date.now(),
-        order_number: window.currentOrderNumber,
-        total_amount: parseFloat(totalAmount.toFixed(2)),
-        order_time: orderTime,
-        tenant_id: window.currentShopId  // 🔥 多商家支持：添加商家ID
+        
+        const now = new Date();
+        const year = now.getFullYear().toString().slice(-2);
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        const second = String(now.getSeconds()).padStart(2, '0');
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        window.currentOrderNumber = year + month + day + hour + minute + second + random;
+        
+        document.getElementById('orderNumber').textContent = window.currentOrderNumber;
+        document.getElementById('orderTime').textContent = now.toLocaleString('zh-CN');
+        
+        const checkoutItems = document.getElementById('checkoutItems');
+        checkoutItems.innerHTML = window._cart.map(item => `
+            <div class="order-item">
+                <span>${item.name} × ${item.quantity}</span>
+                <span>¥${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+        `).join('');
+        
+        const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('finalAmount').textContent = totalAmount.toFixed(2);
+        document.getElementById('qrcodeAmount').textContent = totalAmount.toFixed(2);
+        
+        updateQRCodeDisplay();
+        
+        hideCartModal();
+        switchPage('menuPage', 'checkoutPage');
     };
     
-    console.log('订单数据:', orderData);
-    
-    // 保存订单号和时间戳
-    window.lastOrderTimestamp = orderData.timestamp;
-    
-    // 尝试提交到云端
-    if (window.isCloudConnected && window.supabaseClient) {
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('orders')
-                .insert([orderData])
-                .select();
-            
-            if (error) {
-                console.error('提交到Supabase失败:', error);
+    // 提交订单
+    window.submitOrder = async function() {
+        if (window._cart.length === 0) {
+            alert('订单中没有菜品');
+            return;
+        }
+        
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+        
+        const totalAmount = window._cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const orderTime = new Date().toLocaleString('zh-CN');
+        const dishesString = window._cart.map(item => 
+            `${item.name} × ${item.quantity} = ¥${(item.price * item.quantity).toFixed(2)}`
+        ).join('; ');
+        
+        const orderData = {
+            table: window.sequenceNumber,
+            dishes: dishesString,
+            status: '新订单',
+            timestamp: Date.now(),
+            order_number: window.currentOrderNumber,
+            total_amount: parseFloat(totalAmount.toFixed(2)),
+            order_time: orderTime,
+            tenant_id: window.currentShopId
+        };
+        
+        window.lastOrderTimestamp = orderData.timestamp;
+        
+        if (window.isCloudConnected && window.supabaseClient) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('orders')
+                    .insert([orderData]);
+                
+                if (error) {
+                    console.error('提交到Supabase失败:', error);
+                    saveOrderLocally(orderData);
+                } else {
+                    console.log('订单提交成功');
+                    showSuccessPage();
+                }
+            } catch (error) {
+                console.error('提交异常:', error);
                 saveOrderLocally(orderData);
-            } else {
-                console.log('订单提交成功:', data[0]);
-                showSuccessPage();
             }
-        } catch (error) {
-            console.error('提交异常:', error);
+        } else {
             saveOrderLocally(orderData);
         }
-    } else {
-        // 离线模式，保存到本地
-        saveOrderLocally(orderData);
-    }
-    
-    // 清空购物车
-    window._cart = [];
-    updateCartDisplay();
-    
-    // 隐藏加载动画
-    document.getElementById('loadingOverlay').classList.add('hidden');
-};
+        
+        window._cart = [];
+        updateCartDisplay();
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    };
     
     // 保存订单到本地
     function saveOrderLocally(orderData) {
@@ -2368,7 +2176,6 @@ window.submitOrder = async function() {
                 saved_at: new Date().toISOString()
             });
             localStorage.setItem('localOrders', JSON.stringify(localOrders));
-            console.log('订单已保存到本地');
         } catch (error) {
             console.error('保存到本地失败:', error);
         }
@@ -2376,70 +2183,54 @@ window.submitOrder = async function() {
         showSuccessPage();
     }
     
-    // ============================================
-    // 显示成功页面（修改）
-    // ============================================
+    // 显示成功页面
     function showSuccessPage() {
-        // 设置初始预计取餐时间（当前时间+10分钟）
         const now = new Date();
         const pickupTime = new Date(now.getTime() + 10 * 60000);
         document.getElementById('pickupTime').textContent = 
             pickupTime.getHours().toString().padStart(2, '0') + ':' + 
             pickupTime.getMinutes().toString().padStart(2, '0');
         
-        // 设置初始状态
         document.getElementById('orderStatus').textContent = '等待接单';
         document.getElementById('queueAhead').textContent = '2单';
         document.getElementById('lastStatusUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
         
-        // 切换到成功页面
         switchPage('checkoutPage', 'successPage');
         
-        // 启动自动刷新
         setTimeout(() => {
             startAutoRefresh();
         }, 1000);
     }
     
-    // ============================================
-    // 新增订单时重置
-    // ============================================
+    // 新订单
     window.newOrder = function() {
-        // 停止自动刷新
         if (window.orderStatusInterval) {
             clearInterval(window.orderStatusInterval);
             window.orderStatusInterval = null;
         }
         
-        // 清除本地存储的订单数据（避免混淆）
         localStorage.removeItem('last_order_number');
         localStorage.removeItem('last_order_data');
         
-        // 生成新的顺序号
         generateSequenceNumber();
         
-        // 清空购物车
         window._cart = [];
         updateCartDisplay();
         
-        // 重新加载推荐菜品（确保获取最新的）
         setTimeout(async () => {
             await loadRecommendations();
         }, 500);
         
-        // 切换到顺序号页面
         switchPage('successPage', 'sequencePage');
     };
     
-    // ============================================
-    // 工具函数
-    // ============================================
+    // 页面切换
     function switchPage(fromPage, toPage) {
         document.getElementById(fromPage).classList.add('hidden');
         document.getElementById(toPage).classList.remove('hidden');
     }
     
-    // 模拟等待信息更新
+    // 更新等待信息
     function updateWaitingInfo() {
         const waitingOrders = Math.floor(Math.random() * 5) + 1;
         const waitingMinutes = waitingOrders * 3 + Math.floor(Math.random() * 5);
@@ -2453,7 +2244,6 @@ window.submitOrder = async function() {
     
     // 显示提示消息
     function showToast(message, type = 'success') {
-        // 移除已有的toast
         document.querySelectorAll('.toast-message').forEach(toast => toast.remove());
         
         const toast = document.createElement('div');
@@ -2488,21 +2278,16 @@ window.submitOrder = async function() {
         }, 3000);
     }
     
-    // ============================================
-    // 更新主题函数（多商家支持）
-    // ============================================
+    // 更新主题
     function updateThemeForShop(shopConfig) {
         if (!shopConfig) return;
         
-        // 更新CSS变量
         if (shopConfig.themeColor) {
             document.documentElement.style.setProperty('--primary-color', shopConfig.themeColor);
         }
         
-        // 更新页面标题
         document.title = `${shopConfig.name} - 扫码点餐`;
         
-        // 更新Logo（如果商家有单独的Logo）
         if (shopConfig.logo) {
             const logoImg = document.querySelector('.logo-image');
             if (logoImg) {
@@ -2511,18 +2296,14 @@ window.submitOrder = async function() {
             }
         }
         
-        // 更新店铺名称显示
         const welcomeTitle = document.querySelector('.logo-container h1');
         if (welcomeTitle) {
             welcomeTitle.textContent = `欢迎光临 ${shopConfig.name}`;
         }
     }
     
-    // ============================================
-    // 获取当前商家ID（新增函数）
-    // ============================================
+    // 获取当前商家ID
     function getCurrentShopId() {
-        // 从URL参数获取商家ID
         const urlParams = new URLSearchParams(window.location.search);
         const shopId = urlParams.get('shop');
         
@@ -2530,7 +2311,6 @@ window.submitOrder = async function() {
             return shopId;
         }
         
-        // 从localStorage获取默认商家
         const registeredShops = JSON.parse(localStorage.getItem('registered_shops') || '{}');
         const shopIds = Object.keys(registeredShops);
         
@@ -2538,24 +2318,18 @@ window.submitOrder = async function() {
             return shopIds[0];
         }
         
-        // 如果没有商家ID，使用默认
-        console.warn('⚠️ 未找到商家ID，使用默认');
         return 'default';
     }
     
-    // ============================================
-    // 获取当前商家配置（新增函数）
-    // ============================================
+    // 获取当前商家配置
     function getCurrentShopConfig() {
         const shopId = window.currentShopId || getCurrentShopId();
         
-        // 从localStorage获取商家配置
         const shopConfigStr = localStorage.getItem('shop_config_' + shopId);
         if (shopConfigStr) {
             try {
                 const config = JSON.parse(shopConfigStr);
                 if (config[shopId]) {
-                    console.log('✅ 从localStorage加载商家配置:', config[shopId].name);
                     return config[shopId];
                 }
             } catch (error) {
@@ -2563,14 +2337,10 @@ window.submitOrder = async function() {
             }
         }
         
-        // 如果localStorage没有，尝试从全局配置获取
         if (window.shopConfigs && window.shopConfigs[shopId]) {
-            console.log('✅ 从全局配置加载商家配置:', window.shopConfigs[shopId].name);
             return window.shopConfigs[shopId];
         }
         
-        // 使用默认配置
-        console.log('📝 使用默认商家配置');
         return {
             name: '我的摊位',
             themeColor: '#E63946',
