@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // 商家配置文件 - 多商家支持
 // ============================================
 
-// 支持的商家列表
+// 支持的商家列表 - 正确的对象格式
 window.shopConfigs = {
     "default_shop": {
         "name": "我的摊位",
@@ -183,9 +183,7 @@ window.shopConfigs = {
                 "price": 15,
                 "emoji": "🍜",
                 "category": "主食",
-                "tags": [
-                    "招牌"
-                ]
+                "tags": ["招牌"]
             },
             {
                 "id": 2,
@@ -193,9 +191,7 @@ window.shopConfigs = {
                 "price": 18,
                 "emoji": "🥘",
                 "category": "热菜",
-                "tags": [
-                    "套餐"
-                ]
+                "tags": ["套餐"]
             },
             {
                 "id": 3,
@@ -211,9 +207,7 @@ window.shopConfigs = {
                 "price": 12,
                 "emoji": "🌯",
                 "category": "小吃",
-                "tags": [
-                    "招牌"
-                ]
+                "tags": ["招牌"]
             },
             {
                 "id": 5,
@@ -240,8 +234,36 @@ window.shopConfigs = {
                 "tags": []
             }
         ]
+    },
+    "m_mm0d62gztj7x": {
+        "name": "苗家面馆（演示）",
+        "themeColor": "#e63946",
+        "logo": "images/logo.png",
+        "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/m_mm0d62gztj7x_wechat_qrcode_1771922939655.png",
+        "dishes": [
+            {
+                "id": 1,
+                "name": "招牌炸酱面",
+                "price": 15,
+                "emoji": "🍜",
+                "category": "主食",
+                "tags": []
+            },
+            {
+                "id": 2,
+                "name": "麻辣烫套餐",
+                "price": 18,
+                "emoji": "🥘",
+                "category": "主食",
+                "tags": []
+            }
+        ]
     }
 };
+
+// ============================================
+// 工具函数
+// ============================================
 
 // 获取当前商家ID - 管理员专用版本（完全从URL获取）
 function getCurrentShopId() {
@@ -249,7 +271,7 @@ function getCurrentShopId() {
     const urlParams = new URLSearchParams(window.location.search);
     let shopId = urlParams.get('shop');
     
-    // 如果没有URL参数，使用默认
+    // 如果没有URL参数，或者参数对应的商家配置不存在，使用默认
     if (!shopId || !window.shopConfigs[shopId]) {
         shopId = 'default_shop';
     }
@@ -314,57 +336,7 @@ function autoMergeRegisteredShops() {
                         logo: 'images/logo.png',
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
-                    ,
-    'default_shop': {
-    "name": "我的摊位",
-    "themeColor": "#E63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/bin_mm0baibo8wb4_wechat_qrcode_1771919787602.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
-,
-    'm_mm0d62gztj7x': {
-    "name": "苗家面馆（演示）",
-    "themeColor": "#e63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/m_mm0d62gztj7x_wechat_qrcode_1771922939655.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
-};
+                    };
                 }
                 
                 console.log(`✅ 自动添加商家配置: ${shopData.name} (${shopId})`);
