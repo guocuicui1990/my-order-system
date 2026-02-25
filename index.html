@@ -231,6 +231,7 @@
             gap: 15px;
         }
         
+        /* 修复：将数量控制器移到菜品名称后面，避免底部结算栏遮挡 */
         .dish-card {
             background: white;
             border-radius: 12px;
@@ -239,6 +240,7 @@
             gap: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: transform 0.2s;
+            align-items: center; /* 垂直居中 */
         }
         
         .dish-card:hover {
@@ -259,26 +261,40 @@
         
         .dish-details {
             flex: 1;
+            display: flex;
+            flex-wrap: wrap;        /* 允许换行 */
+            align-items: center;    /* 垂直居中 */
+            gap: 10px 15px;         /* 间距，适应小屏幕 */
         }
         
         .dish-name {
             font-weight: 600;
             font-size: 15px;
             color: var(--dark-text);
-            margin-bottom: 5px;
+            white-space: nowrap;    /* 防止名称换行 */
         }
         
         .dish-price {
             color: var(--primary-color);
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-right: auto;      /* 将价格和后面的操作推开 */
+        }
+        
+        /* 新的布局：菜品信息区域，名称和价格可以并排 */
+        .dish-info-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         
         .dish-actions {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-left: auto;       /* 靠右对齐，但因为有价格在左侧，这里可保留 */
+            flex-shrink: 0;
         }
         
         .quantity-btn {
@@ -1833,7 +1849,7 @@ async function refreshOrderStatus() {
         loadDishes(category === '全部' ? null : category);
     }
     
-    // 加载菜品
+    // 加载菜品（修改：数量控制器移到名称后面）
     function loadDishes(category = null) {
         const dishesContainer = document.getElementById('dishesContainer');
         if (!dishesContainer) return;
@@ -1843,7 +1859,7 @@ async function refreshOrderStatus() {
             ? window._dishesData.filter(dish => dish.category === category)
             : window._dishesData;
         
-        // 生成菜品HTML
+        // 生成菜品HTML - 修复：将数量控制器放在名称和价格的同一行，紧跟在价格后面
         dishesContainer.innerHTML = filteredDishes.map(dish => {
             const cartItem = window._cart.find(item => item.id === dish.id);
             const quantity = cartItem ? cartItem.quantity : 0;
@@ -1852,16 +1868,18 @@ async function refreshOrderStatus() {
             <div class="dish-card">
                 <div class="dish-emoji">${dish.emoji}</div>
                 <div class="dish-details">
-                    <div class="dish-name">${dish.name}</div>
-                    <div class="dish-price">¥${dish.price}</div>
-                    <div class="dish-actions">
-                        <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})" ${quantity === 0 ? 'disabled style="opacity:0.3"' : ''}>
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="dish-quantity">${quantity}</span>
-                        <button class="quantity-btn" onclick="increaseQuantity(${dish.id})">
-                            <i class="fas fa-plus"></i>
-                        </button>
+                    <div class="dish-info-row" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%;">
+                        <span class="dish-name">${dish.name}</span>
+                        <span class="dish-price">¥${dish.price}</span>
+                        <div class="dish-actions" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                            <button class="quantity-btn" onclick="decreaseQuantity(${dish.id})" ${quantity === 0 ? 'disabled style="opacity:0.3"' : ''}>
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="dish-quantity">${quantity}</span>
+                            <button class="quantity-btn" onclick="increaseQuantity(${dish.id})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
