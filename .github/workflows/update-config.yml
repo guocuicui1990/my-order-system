@@ -89,16 +89,54 @@ jobs:
         const sid = Object.keys(cfg)[0];
         const sc = cfg[sid];
         let txt = fs.readFileSync('config.js', 'utf8');
-        const ns = "'" + sid + "': " + JSON.stringify(sc, null, 4);
-        if (txt.includes("'" + sid + "':")) {
-          const re = new RegExp("'" + sid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'\\s*:\\s*\\{[\\s\\S]*?\\n\\s*\\}", 'm');
+        // 格式化新商家配置字符串（与 config.js 现有风格一致，使用双引号）
+        const ns = `    "${sid}": ${JSON.stringify(sc, null, 4)}`;
+        if (txt.includes(`"${sid}":`)) {
+          // 更新已存在的商家
+          const re = new RegExp(
+            `"${sid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\s*:\\s*\\{[\\s\\S]*?\\n\\s*\\}`,
+            'm'
+          );
           txt = txt.replace(re, ns);
         } else {
-          const p = txt.lastIndexOf('};');
-          txt = txt.substring(0, p) + ',\n    ' + ns + '\n' + txt.substring(p);
+          // 精确定位 window.shopConfigs = { 的结束位置（括号匹配算法）
+          const marker = 'window.shopConfigs = {';
+          const objStart = txt.indexOf(marker);
+          if (objStart === -1) throw new Error('未找到 window.shopConfigs 定义');
+          let braceCount = 0;
+          let inString = false;
+          let strChar = '';
+          let escape = false;
+          let objEnd = -1;
+          for (let i = objStart + marker.length; i < txt.length; i++) {
+            const c = txt[i];
+            if (escape) { escape = false; continue; }
+            if (c === '\\' && inString) { escape = true; continue; }
+            if ((c === '"' || c === "'") && !inString) {
+              inString = true;
+              strChar = c;
+              continue;
+            }
+            if (inString && c === strChar) { inString = false; continue; }
+            if (!inString) {
+              if (c === '{') braceCount++;
+              else if (c === '}') {
+                if (braceCount === 0) { objEnd = i; break; }
+                else braceCount--;
+              }
+            }
+          }
+          if (objEnd === -1) throw new Error('无法找到 window.shopConfigs 的结束位置');
+          // 判断结束 } 之前最后一个非空白字符，决定是否补逗号
+          let lastNonSpace = objEnd - 1;
+          while (lastNonSpace >= 0 && /\s/.test(txt[lastNonSpace])) lastNonSpace--;
+          const lastChar = txt[lastNonSpace];
+          const needComma = lastChar !== ',' && lastChar !== '{';
+          const insertStr = (needComma ? ',\n' : '\n') + ns + '\n';
+          txt = txt.substring(0, objEnd) + insertStr + txt.substring(objEnd);
         }
         fs.writeFileSync('config.js', txt);
-        console.log('Updated');
+        console.log('Updated:', sid);
         JSEND
         
     - name: Commit and Push with retry
