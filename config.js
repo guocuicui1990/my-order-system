@@ -234,56 +234,7 @@ window.shopConfigs = {
                 "tags": []
             }
         ]
-    },
-    "m_mm0d62gztj7x": {
-        "name": "苗家面馆（演示）",
-        "themeColor": "#e63946",
-        "logo": "images/logo.png",
-        "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/m_mm0d62gztj7x_wechat_qrcode_1771922939655.png",
-        "dishes": [
-            {
-                "id": 1,
-                "name": "招牌炸酱面",
-                "price": 15,
-                "emoji": "🍜",
-                "category": "主食",
-                "tags": []
-            },
-            {
-                "id": 2,
-                "name": "麻辣烫套餐",
-                "price": 18,
-                "emoji": "🥘",
-                "category": "主食",
-                "tags": []
-            }
-        ]
     }
-,
-    "l_mm1gs47coiuq": {
-    "name": "老通关",
-    "themeColor": "#e63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/l_mm1gs47coiuq_wechat_qrcode_1771989473355.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
 };
 
 // ============================================
@@ -361,32 +312,7 @@ function autoMergeRegisteredShops() {
                         logo: 'images/logo.png',
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
-                    ,
-    'e_mm1fnr0zkeoh': {
-    "name": "ewwe",
-    "themeColor": "#e63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/e_mm1fnr0zkeoh_wechat_qrcode_1771987590037.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
-};
+                    };
                 }
                 
                 console.log(`✅ 自动添加商家配置: ${shopData.name} (${shopId})`);
