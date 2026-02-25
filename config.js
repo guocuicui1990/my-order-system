@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ============================================
 
 // 支持的商家列表 - 正确的对象格式
+// ---------- 商家配置开始标记 ----------
 window.shopConfigs = {
     "default_shop": {
         "name": "我的摊位",
@@ -260,6 +261,7 @@ window.shopConfigs = {
         ]
     }
 };
+// ---------- 商家配置结束标记 ----------
 
 // ============================================
 // 工具函数
@@ -336,32 +338,7 @@ function autoMergeRegisteredShops() {
                         logo: 'images/logo.png',
                         qrcode: 'images/qrcode.jpg',
                         dishes: shopData.dishes || []
-                    ,
-    'l_mm1djanssmnr': {
-    "name": "东北炖大鹅",
-    "themeColor": "#e63946",
-    "logo": "images/logo.png",
-    "qrcode": "https://slonbvmhsxqgpoodwazj.supabase.co/storage/v1/object/public/shop-qrcodes/l_mm1djanssmnr_wechat_qrcode_1771984022971.png",
-    "dishes": [
-        {
-            "id": 1,
-            "name": "招牌炸酱面",
-            "price": 15,
-            "emoji": "🍜",
-            "category": "主食",
-            "tags": []
-        },
-        {
-            "id": 2,
-            "name": "麻辣烫套餐",
-            "price": 18,
-            "emoji": "🥘",
-            "category": "主食",
-            "tags": []
-        }
-    ]
-}
-};
+                    };
                 }
                 
                 console.log(`✅ 自动添加商家配置: ${shopData.name} (${shopId})`);
